@@ -21,7 +21,7 @@ import (
 
 	"github.com/coreos/bolt"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/ptrkrlsrd/ac/pkg/acache"
+	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

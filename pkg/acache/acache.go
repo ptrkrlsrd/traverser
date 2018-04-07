@@ -15,11 +15,8 @@
 package acache
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -58,14 +55,6 @@ func NewCache(db *bolt.DB) CacheStore {
 	return cacheStore
 }
 
-func (cacheStore *CacheStore) HasRoute(route string) bool {
-	return false
-}
-
-func (cacheStore CacheStore) HasItems() bool {
-	return true
-}
-
 func (cacheStore *CacheStore) ListRoutes() {
 	log.Println("list routes")
 	cacheItems, _ := cacheStore.GetCacheItems()
@@ -73,9 +62,6 @@ func (cacheStore *CacheStore) ListRoutes() {
 		fmt.Printf("%s %s\n", v.ID, v.Alias)
 	}
 }
-
-/*func (cacheStore CacheStore) GetURLS() []string {
-}*/
 
 func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 	var cacheItems []CacheItem
@@ -100,8 +86,8 @@ func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 }
 
 func (cacheStore *CacheStore) AddRoute(url string, alias string) {
-	data := FetchJSON(url)
-	key := MD5Hash(alias)
+	data := fetchJSON(url)
+	key := md5Hash(alias)
 
 	cacheItem := CacheItem{ID: key, URL: url, Alias: alias, Data: data}
 	jsonData, err := json.Marshal(cacheItem)
@@ -115,28 +101,6 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) {
 		err := b.Put([]byte(key), jsonData)
 		return err
 	})
-}
-
-func FetchJSON(url string) []byte {
-	res, err := http.Get(url)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return body
-}
-
-func MD5Hash(text string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
-	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func (cacheStore *CacheStore) StartServer(port string) {
