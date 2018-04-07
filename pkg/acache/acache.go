@@ -56,7 +56,6 @@ func NewCache(db *bolt.DB) CacheStore {
 }
 
 func (cacheStore *CacheStore) ListRoutes() {
-	log.Println("list routes")
 	cacheItems, _ := cacheStore.GetCacheItems()
 	for _, v := range cacheItems {
 		fmt.Printf("%s %s\n", v.ID, v.Alias)
