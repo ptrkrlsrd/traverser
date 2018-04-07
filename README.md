@@ -17,6 +17,10 @@ acache list
 ```
 acache add https://github.com github.com
 ```
+- Serve:
+```
+acache serve
+```
 
 # Tech
 - Go <3
