@@ -23,6 +23,6 @@ acache serve
 ```
 
 # Tech
-- Go <3
-- Cobra 
-- BoltDB
+- [Go](https://golang.org/) <3
+- [Cobra](https://github.com/spf13/cobra)
+- [BoltDB](https://github.com/coreos/bbolt)
