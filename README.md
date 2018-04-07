@@ -18,5 +18,7 @@ acache list
 acache add https://github.com github.com
 ```
 
-* Tech
-Go, Cobra and BoltDB
+# Tech
+- Go <3
+- Cobra 
+- BoltDB
