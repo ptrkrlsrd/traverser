@@ -116,7 +116,8 @@ func (cacheStore *CacheStore) StartServer(port string) {
 
 	for _, v := range cacheItems {
 		router.GET(v.Alias, func(c *gin.Context) {
-			c.JSON(http.StatusOK, string(v.Data))
+			c.Header("Content-Type", "application/json; charset=utf-8")
+			c.String(http.StatusOK, string(v.Data))
 		})
 	}
 
