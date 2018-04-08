@@ -97,6 +97,12 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) {
 
 	cacheStore.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
+		if b == nil {
+			err = fmt.Errorf("Failed to update the DB. Have you run acache init?")
+			log.Println(err)
+			return err
+		}
+
 		err := b.Put([]byte(key), jsonData)
 		return err
 	})
