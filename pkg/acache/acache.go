@@ -84,7 +84,7 @@ func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 	return cacheItems, err
 }
 
-func (cacheStore *CacheStore) AddRoute(url string, alias string) {
+func (cacheStore *CacheStore) AddRoute(url string, alias string) error {
 	data := fetchJSON(url)
 	key := md5Hash(alias)
 
@@ -92,10 +92,11 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) {
 	jsonData, err := json.Marshal(cacheItem)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 
-	cacheStore.DB.Update(func(tx *bolt.Tx) error {
+	err = cacheStore.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
 			err = fmt.Errorf("Failed to update the DB. Have you run acache init?")
@@ -106,6 +107,8 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) {
 		err := b.Put([]byte(key), jsonData)
 		return err
 	})
+
+	return err
 }
 
 func (cacheStore *CacheStore) StartServer(port string) {

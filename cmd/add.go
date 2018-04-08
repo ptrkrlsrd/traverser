@@ -15,6 +15,9 @@
 package cmd
 
 import (
+	"log"
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,9 +26,17 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a new route",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 2 {
+			log.Println("Please enter an URL and an alias")
+			os.Exit(1)
+		}
+
 		url := args[0]
 		alias := args[1]
-		cacheStore.AddRoute(url, alias)
+
+		if err := cacheStore.AddRoute(url, alias); err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
