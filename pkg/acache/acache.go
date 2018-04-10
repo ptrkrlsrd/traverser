@@ -67,8 +67,15 @@ func (cacheStore *CacheStore) InitBucket() {
 
 func (cacheStore *CacheStore) ListRoutes() {
 	cacheItems, _ := cacheStore.GetCacheItems()
-	for _, v := range cacheItems {
-		fmt.Printf("%s %s\n", v.ID, v.Alias)
+	for i, v := range cacheItems {
+		fmt.Printf("%d) %s -> %s\n", i, v.URL, v.Alias)
+	}
+}
+
+func (cacheStore *CacheStore) Info() {
+	cacheItems, _ := cacheStore.GetCacheItems()
+	for i, v := range cacheItems {
+		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n", i, v.URL, v.Alias, v.ID)
 	}
 }
 
