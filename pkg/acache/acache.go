@@ -84,12 +84,16 @@ func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 
 	err := cacheStore.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
+		if b == nil {
+			return fmt.Errorf("Could not find bucket %s", BoltBucketName)
+		}
+
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			cacheItem, err := CacheItemFromBytes(v)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			cacheItems = append(cacheItems, cacheItem)
