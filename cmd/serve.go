@@ -33,7 +33,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		port := "3000"
 		log.Println("Started server on port " + port)
-		cacheStore.StartServer(port)
+		store.StartServer(port)
 	},
 }
 

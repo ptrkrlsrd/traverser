@@ -26,7 +26,7 @@ var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "A brief description of your command",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := cacheStore.ClearDB()
+		err := store.ClearDB()
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)

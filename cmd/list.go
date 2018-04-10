@@ -23,7 +23,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all routes(aliases)",
 	Run: func(cmd *cobra.Command, args []string) {
-		cacheStore.ListRoutes()
+		store.ListRoutes()
 	},
 }
 

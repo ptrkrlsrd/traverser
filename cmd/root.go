@@ -27,7 +27,7 @@ import (
 )
 
 var cfgFile string
-var cacheStore acache.CacheStore
+var store acache.Store
 
 const (
 	DBName = "acache.db"
@@ -61,7 +61,7 @@ func initDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cacheStore = acache.NewCache(db)
+	store = acache.NewCache(db)
 
 }
 

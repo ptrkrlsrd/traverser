@@ -29,7 +29,7 @@ var addCmd = &cobra.Command{
 		url := args[0]
 		alias := args[1]
 
-		if err := cacheStore.AddRoute(url, alias); err != nil {
+		if err := store.AddRoute(url, alias); err != nil {
 			log.Fatal(err)
 		}
 	},

@@ -23,7 +23,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init BoltDB",
 	Run: func(cmd *cobra.Command, args []string) {
-		cacheStore.InitBucket()
+		store.InitBucket()
 	},
 }
 

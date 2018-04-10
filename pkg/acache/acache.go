@@ -28,15 +28,15 @@ const (
 	BoltBucketName = "acache"
 )
 
-type CacheItem struct {
+type Route struct {
 	ID    string `json:"key"`
 	URL   string `json:"url"`
 	Alias string `json:"alias"`
 	Data  []byte `json:"data"`
 }
 
-func CacheItemFromBytes(bytes []byte) (CacheItem, error) {
-	var cacheItem CacheItem
+func RouteFromBytes(bytes []byte) (Route, error) {
+	var cacheItem Route
 	err := json.Unmarshal(bytes, &cacheItem)
 	if err != nil {
 		return cacheItem, err
@@ -45,18 +45,18 @@ func CacheItemFromBytes(bytes []byte) (CacheItem, error) {
 	return cacheItem, nil
 }
 
-type CacheStore struct {
+type Store struct {
 	DB *bolt.DB
 }
 
-func NewCache(db *bolt.DB) CacheStore {
-	cacheStore := CacheStore{DB: db}
+func NewCache(db *bolt.DB) Store {
+	store := Store{DB: db}
 
-	return cacheStore
+	return store
 }
 
-func (cacheStore *CacheStore) InitBucket() {
-	cacheStore.DB.Update(func(tx *bolt.Tx) error {
+func (store *Store) InitBucket() {
+	store.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket([]byte("acache"))
 		if err != nil {
 			return fmt.Errorf("Failed creating bucket with error: %s", err)
@@ -65,24 +65,24 @@ func (cacheStore *CacheStore) InitBucket() {
 	})
 }
 
-func (cacheStore *CacheStore) ListRoutes() {
-	cacheItems, _ := cacheStore.GetCacheItems()
+func (store *Store) ListRoutes() {
+	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s -> %s\n", i, v.URL, v.Alias)
 	}
 }
 
-func (cacheStore *CacheStore) Info() {
-	cacheItems, _ := cacheStore.GetCacheItems()
+func (store *Store) Info() {
+	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n", i, v.URL, v.Alias, v.ID)
 	}
 }
 
-func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
-	var cacheItems []CacheItem
+func (store Store) GetRoutes() ([]Route, error) {
+	var cacheItems []Route
 
-	err := cacheStore.DB.View(func(tx *bolt.Tx) error {
+	err := store.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
 			return fmt.Errorf("Could not find bucket %s", BoltBucketName)
@@ -91,7 +91,7 @@ func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			cacheItem, err := CacheItemFromBytes(v)
+			cacheItem, err := RouteFromBytes(v)
 			if err != nil {
 				return err
 			}
@@ -105,11 +105,11 @@ func (cacheStore CacheStore) GetCacheItems() ([]CacheItem, error) {
 	return cacheItems, err
 }
 
-func (cacheStore *CacheStore) AddRoute(url string, alias string) error {
+func (store *Store) AddRoute(url string, alias string) error {
 	data := fetchJSON(url)
 	key := md5Hash(alias)
 
-	cacheItem := CacheItem{ID: key, URL: url, Alias: alias, Data: data}
+	cacheItem := Route{ID: key, URL: url, Alias: alias, Data: data}
 	jsonData, err := json.Marshal(cacheItem)
 
 	if err != nil {
@@ -117,7 +117,7 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) error {
 		return err
 	}
 
-	err = cacheStore.DB.Update(func(tx *bolt.Tx) error {
+	err = store.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
 			err = fmt.Errorf("Failed to update the DB. Have you run acache init?")
@@ -132,8 +132,8 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) error {
 	return err
 }
 
-func (cacheStore *CacheStore) ClearDB() error {
-	err := cacheStore.DB.Update(func(tx *bolt.Tx) error {
+func (store *Store) ClearDB() error {
+	err := store.DB.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(BoltBucketName))
 		return err
 	})
@@ -141,11 +141,11 @@ func (cacheStore *CacheStore) ClearDB() error {
 	return err
 }
 
-func (cacheStore *CacheStore) StartServer(port string) {
+func (store *Store) StartServer(port string) {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	cacheItems, _ := cacheStore.GetCacheItems()
+	cacheItems, _ := store.GetRoutes()
 
 	for _, v := range cacheItems {
 		router.GET(v.Alias, func(c *gin.Context) {
