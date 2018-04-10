@@ -128,6 +128,15 @@ func (cacheStore *CacheStore) AddRoute(url string, alias string) error {
 	return err
 }
 
+func (cacheStore *CacheStore) ClearDB() error {
+	err := cacheStore.DB.Update(func(tx *bolt.Tx) error {
+		err := tx.DeleteBucket([]byte(BoltBucketName))
+		return err
+	})
+
+	return err
+}
+
 func (cacheStore *CacheStore) StartServer(port string) {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
