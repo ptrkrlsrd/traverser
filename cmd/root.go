@@ -29,6 +29,10 @@ import (
 var cfgFile string
 var cacheStore acache.CacheStore
 
+const (
+	DBName = "acache.db"
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "acache",
@@ -38,13 +42,6 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	db, err := bolt.Open("acache.db", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	cacheStore = acache.NewCache(db)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -54,15 +51,18 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initDB)
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.acache.json)")
+}
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.acache.yaml)")
+func initDB() {
+	home, err := homedir.Dir()
+	db, err := bolt.Open(fmt.Sprintf("%s/.config/acache/%s", home, DBName), 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cacheStore = acache.NewCache(db)
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.

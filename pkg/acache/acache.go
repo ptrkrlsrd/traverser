@@ -55,6 +55,16 @@ func NewCache(db *bolt.DB) CacheStore {
 	return cacheStore
 }
 
+func (cacheStore *CacheStore) InitBucket() {
+	cacheStore.DB.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucket([]byte("acache"))
+		if err != nil {
+			return fmt.Errorf("Failed creating bucket with error: %s", err)
+		}
+		return nil
+	})
+}
+
 func (cacheStore *CacheStore) ListRoutes() {
 	cacheItems, _ := cacheStore.GetCacheItems()
 	for _, v := range cacheItems {

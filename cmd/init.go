@@ -15,9 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/coreos/bolt"
 	"github.com/spf13/cobra"
 )
 
@@ -26,13 +23,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init BoltDB",
 	Run: func(cmd *cobra.Command, args []string) {
-		cacheStore.DB.Update(func(tx *bolt.Tx) error {
-			_, err := tx.CreateBucket([]byte("acache"))
-			if err != nil {
-				return fmt.Errorf("create bucket: %s", err)
-			}
-			return nil
-		})
+		cacheStore.InitBucket()
 	},
 }
 
