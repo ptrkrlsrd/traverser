@@ -21,7 +21,7 @@ import (
 	"net/http"
 )
 
-func fetchJSON(url string) []byte {
+func fetchJSON(url string) ([]byte, *http.Response, error) {
 	res, err := http.Get(url)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func fetchJSON(url string) []byte {
 		panic(err.Error())
 	}
 
-	return body
+	return body, res, nil
 }
 
 func md5Hash(text string) string {

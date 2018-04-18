@@ -29,10 +29,11 @@ const (
 )
 
 type Route struct {
-	ID    string `json:"key"`
-	URL   string `json:"url"`
-	Alias string `json:"alias"`
-	Data  []byte `json:"data"`
+	ID          string `json:"key"`
+	URL         string `json:"url"`
+	Alias       string `json:"alias"`
+	Data        []byte `json:"data"`
+	ContentType string `json:"contentType"`
 }
 
 func RouteFromBytes(bytes []byte) (Route, error) {
@@ -75,7 +76,7 @@ func (store *Store) ListRoutes() {
 func (store *Store) Info() {
 	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
-		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n", i, v.URL, v.Alias, v.ID)
+		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
 }
 
@@ -106,10 +107,16 @@ func (store Store) GetRoutes() ([]Route, error) {
 }
 
 func (store *Store) AddRoute(url string, alias string) error {
-	data := fetchJSON(url)
+	data, resp, err := fetchJSON(url)
 	key := md5Hash(alias)
 
-	cacheItem := Route{ID: key, URL: url, Alias: alias, Data: data}
+	cacheItem := Route{
+		ID:          key,
+		URL:         url,
+		Alias:       alias,
+		Data:        data,
+		ContentType: resp.Header.Get("Content-Type"),
+	}
 	jsonData, err := json.Marshal(cacheItem)
 
 	if err != nil {
@@ -149,7 +156,7 @@ func (store *Store) StartServer(port string) {
 
 	for _, v := range cacheItems {
 		router.GET(v.Alias, func(c *gin.Context) {
-			c.Header("Content-Type", "application/json; charset=utf-8")
+			c.Header("Content-Type", v.ContentType)
 			c.String(http.StatusOK, string(v.Data))
 		})
 	}
