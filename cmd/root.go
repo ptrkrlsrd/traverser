@@ -29,9 +29,7 @@ import (
 var cfgFile string
 var store acache.Store
 
-const (
-	DBName = "acache.db"
-)
+const DBName = "acache.db"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -52,7 +50,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(initDB)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.acache.json)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/acache/acache.json)")
 }
 
 func initDB() {
@@ -65,21 +63,29 @@ func initDB() {
 
 }
 
+func configPath() (string, error) {
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", err
+	}
+
+	return home + ".config/acache/", nil
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
+		// Search config in home directory with name ".config/acache" (without extension).
+		configPath, err := configPath()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".acache" (without extension).
-		viper.AddConfigPath(home)
+		viper.AddConfigPath(configPath)
 		viper.SetConfigName("config")
 	}
 
