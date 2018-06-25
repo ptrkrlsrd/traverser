@@ -20,16 +20,16 @@ import (
 	"os"
 
 	"github.com/coreos/bolt"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
-var cfgFile string
-var store acache.Store
-
-const DBName = "acache.db"
+var (
+	cfgFile string
+	store   acache.Store
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,7 +40,6 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -48,28 +47,13 @@ func Execute() {
 }
 
 func init() {
+	// Set the flags
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
+	rootCmd.PersistentFlags().StringP("database", "d", "~/.config/acache/acache.db", "Database")
+
+	// Initialize the database and config
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(initDB)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/acache/acache.json)")
-}
-
-func initDB() {
-	home, err := homedir.Dir()
-	db, err := bolt.Open(fmt.Sprintf("%s/.config/acache/%s", home, DBName), 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	store = acache.NewCache(db)
-
-}
-
-func configPath() (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	return home + ".config/acache/", nil
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -95,4 +79,21 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func initDB() {
+	path := rootCmd.Flag("database").Value.String()
+	expandedPath, err := tilde.Expand(path)
+	db, err := bolt.Open(expandedPath, 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	store = acache.NewCache(db)
+
+}
+
+func configPath() (string, error) {
+	path := rootCmd.Flag("config").Value.String()
+	expandedPath, err := tilde.Expand(path)
+	return expandedPath, err
 }

@@ -56,12 +56,13 @@ func NewCache(db *bolt.DB) Store {
 	return store
 }
 
-func (store *Store) InitBucket() {
-	store.DB.Update(func(tx *bolt.Tx) error {
+func (store *Store) InitBucket() error {
+	return store.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket([]byte("acache"))
 		if err != nil {
 			return fmt.Errorf("Failed creating bucket with error: %s", err)
 		}
+
 		return nil
 	})
 }
@@ -106,6 +107,24 @@ func (store Store) GetRoutes() ([]Route, error) {
 	return cacheItems, err
 }
 
+func (store *Store) HasRoute(url string) (bool, error) {
+	var hasRoute = false
+
+	routes, err := store.GetRoutes()
+
+	if err != nil {
+		return false, err
+	}
+
+	for _, v := range routes {
+		if v.URL == url {
+			hasRoute = true
+		}
+	}
+
+	return hasRoute, nil
+}
+
 func (store *Store) AddRoute(url string, alias string) error {
 	data, resp, err := fetchJSON(url)
 	key := md5Hash(alias)
@@ -117,6 +136,7 @@ func (store *Store) AddRoute(url string, alias string) error {
 		Data:        data,
 		ContentType: resp.Header.Get("Content-Type"),
 	}
+
 	jsonData, err := json.Marshal(cacheItem)
 
 	if err != nil {

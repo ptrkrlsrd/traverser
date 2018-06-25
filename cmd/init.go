@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +25,11 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init BoltDB",
 	Run: func(cmd *cobra.Command, args []string) {
-		store.InitBucket()
+		if err := store.InitBucket(); err == nil {
+			log.Println("Sucessfully initialized the database")
+		} else {
+			log.Printf("Failed when trying to initialize DB")
+		}
 	},
 }
 
