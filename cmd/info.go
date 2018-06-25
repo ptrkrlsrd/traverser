@@ -21,7 +21,7 @@ import (
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "A brief description of your command",
+	Short: "Info about the routes",
 	Run: func(cmd *cobra.Command, args []string) {
 		store.Info()
 	},

@@ -24,7 +24,7 @@ import (
 // clearCmd represents the clear command
 var clearCmd = &cobra.Command{
 	Use:   "clear",
-	Short: "A brief description of your command",
+	Short: "Clear the database",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := store.ClearDB()
 		if err != nil {

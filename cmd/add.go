@@ -23,7 +23,7 @@ import (
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add a new route",
+	Short: "Add a new route. Example: 'acache add https://api.coinmarketcap.com/v1/ticker/ /eth' where the first argument is the path to the endpoint you want to cache, and the last is the alias",
 	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		url := args[0]
