@@ -39,9 +39,8 @@ acache list
 ```
 
 ### Add routes
-Note: You must supply *https://* to the first URL
 ```
-acache add https://api.coinmarketcap.com/v1/ticker/ eth
+acache add https://api.coinmarketcap.com/v1/ticker/ /eth
 ```
 
 ### Serve:
