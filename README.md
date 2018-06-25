@@ -28,24 +28,9 @@ Use "acache [command] --help" for more information about a command.
 go get https://github.com/ptrkrlsrd/acache/
 ```
 
-### Init
-```
-acache init
-```
-
-### List routes
-```
-acache list
-```
-
 ### Add routes
 ```
 acache add https://api.coinmarketcap.com/v1/ticker/ /eth
-```
-
-### Serve:
-```
-acache serve
 ```
 
 # Tech
