@@ -181,5 +181,7 @@ func (store *Store) StartServer(port string) {
 		})
 	}
 
-	router.Run(":" + port)
+	if err := router.Run(":" + port); err != nil {
+		log.Println(err)
+	}
 }
