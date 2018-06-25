@@ -17,7 +17,6 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/coreos/bolt"
@@ -140,15 +139,13 @@ func (store *Store) AddRoute(url string, alias string) error {
 	jsonData, err := json.Marshal(cacheItem)
 
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
 	err = store.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
-			err = fmt.Errorf("Failed to update the DB. Have you run acache init?")
-			log.Println(err)
+			err = fmt.Errorf("failed to update the DB. Have you run 'acache init' yet?")
 			return err
 		}
 
@@ -168,7 +165,7 @@ func (store *Store) ClearDB() error {
 	return err
 }
 
-func (store *Store) StartServer(port string) {
+func (store *Store) StartServer(port string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
@@ -182,6 +179,8 @@ func (store *Store) StartServer(port string) {
 	}
 
 	if err := router.Run(":" + port); err != nil {
-		log.Println(err)
+		return err
 	}
+
+	return nil
 }

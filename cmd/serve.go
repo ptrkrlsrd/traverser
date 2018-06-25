@@ -30,7 +30,9 @@ var serveCmd = &cobra.Command{
 	Short: "Serve the api",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Started server on port: %s\n", port)
-		store.StartServer(port)
+		if err := store.StartServer(port); err != nil {
+			log.Println(err)
+		}
 	},
 }
 
