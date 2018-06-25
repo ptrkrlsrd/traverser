@@ -20,12 +20,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	port string
+)
+
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "",
+	Short: "Serve the api",
 	Run: func(cmd *cobra.Command, args []string) {
-		port := "3000"
 		log.Printf("Started server on port: %s\n", port)
 		store.StartServer(port)
 	},
@@ -34,5 +37,5 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().IntP("port", "p", 3000, "Port")
+	serveCmd.Flags().StringVarP(&port, "port", "p", "3000", "Port")
 }
