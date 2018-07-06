@@ -17,10 +17,13 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
+	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
+	"github.com/ptrkrlsrd/utilities/pkg/unet"
 )
 
 const (
@@ -124,9 +127,36 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	return hasRoute, nil
 }
 
+func generateAlias(url string) string {
+	splitUrl, _ := unet.SplitUrl(url)
+
+	if len(splitUrl) > 1 {
+		return splitUrl[1]
+	}
+
+	hash := ucrypt.MD5Hash(url)
+	return hash
+}
+
+func fetchItem(url string) ([]byte, *http.Response, error) {
+	res, err := http.Get(url)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return body, res, nil
+}
+
 func (store *Store) AddRoute(url string, alias string) error {
-	data, resp, err := fetchJSON(url)
-	key := md5Hash(alias)
+	data, resp, err := fetchItem(url)
+	key := ucrypt.MD5Hash(alias)
 
 	cacheItem := Route{
 		ID:          key,
