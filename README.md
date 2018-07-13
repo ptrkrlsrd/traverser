@@ -1,5 +1,5 @@
 # Acache
-Simple API cacher and server written in Go
+API cacher and server written in Go
 
 ## Usage
 ```
