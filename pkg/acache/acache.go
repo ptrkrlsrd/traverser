@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/coreos/bolt"
@@ -70,14 +71,20 @@ func (store *Store) InitBucket() error {
 }
 
 func (store *Store) ListRoutes() {
-	cacheItems, _ := store.GetRoutes()
+	cacheItems, err := store.GetRoutes()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s -> %s\n", i, v.URL, v.Alias)
 	}
 }
 
 func (store *Store) Info() {
-	cacheItems, _ := store.GetRoutes()
+	cacheItems, err := store.GetRoutes()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
