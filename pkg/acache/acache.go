@@ -70,14 +70,17 @@ func (store *Store) InitBucket() error {
 	})
 }
 
-func (store *Store) ListRoutes() {
+func (store *Store) ListRoutes() (string, error) {
+	var output string
 	cacheItems, err := store.GetRoutes()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
+
 	for i, v := range cacheItems {
-		fmt.Printf("%d) %s -> %s\n", i, v.URL, v.Alias)
+		output += fmt.Sprintf("%d) %s -> %s\n", i, v.URL, v.Alias)
 	}
+	return output, nil
 }
 
 func (store *Store) Info() {
