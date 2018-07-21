@@ -18,13 +18,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
-	"github.com/ptrkrlsrd/utilities/pkg/unet"
 )
 
 const (
@@ -87,14 +85,17 @@ func (store *Store) ListRoutes() (string, error) {
 }
 
 //Info Info...
-func (store *Store) Info() {
+func (store *Store) Info() error {
 	cacheItems, err := store.GetRoutes()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
+
+	return nil
 }
 
 //GetRoutes GetRoutes...
@@ -143,31 +144,14 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	return hasRoute, nil
 }
 
-func generateAlias(url string) string {
-	splitURL, _ := unet.SplitUrl(url)
-
-	if len(splitURL) > 1 {
-		return splitURL[1]
-	}
-
-	hash := ucrypt.MD5Hash(url)
-	return hash
-}
-
 func fetchItem(url string) ([]byte, *http.Response, error) {
 	res, err := http.Get(url)
-
 	if err != nil {
-		panic(err.Error())
+		return nil, nil, err
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return body, res, nil
+	return body, res, err
 }
 
 //AddRoute AddRoute...
