@@ -19,12 +19,11 @@ func generateAlias(url string) string {
 	return hash
 }
 
+// CacheRoute Cache a given route
 func CacheRoute(store *Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req = c.Request
 		var url = req.URL.String()
-
-		log.Println("cached route", url)
 
 		go func(url string) {
 			if hasRoute, err := store.HasRoute(url); err == nil && !hasRoute {
@@ -33,6 +32,7 @@ func CacheRoute(store *Store) gin.HandlerFunc {
 				if err != nil {
 					log.Println(err)
 				}
+				log.Println("cached route", url)
 			}
 		}(url)
 

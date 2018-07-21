@@ -24,9 +24,11 @@ import (
 )
 
 const (
+	// BoltBucketName BoltBucketName...
 	BoltBucketName = "acache"
 )
 
+// Route Route
 type Route struct {
 	ID          string `json:"key"`
 	URL         string `json:"url"`
@@ -35,6 +37,12 @@ type Route struct {
 	ContentType string `json:"contentType"`
 }
 
+// Store Store..
+type Store struct {
+	DB *bolt.DB
+}
+
+// RouteFromBytes RouteFromBytes...
 func RouteFromBytes(bytes []byte) (Route, error) {
 	var cacheItem Route
 	err := json.Unmarshal(bytes, &cacheItem)
@@ -45,16 +53,14 @@ func RouteFromBytes(bytes []byte) (Route, error) {
 	return cacheItem, nil
 }
 
-type Store struct {
-	DB *bolt.DB
-}
-
+// NewCache NewCache...
 func NewCache(db *bolt.DB) Store {
 	store := Store{DB: db}
 
 	return store
 }
 
+//InitBucket InitBucket...
 func (store *Store) InitBucket() error {
 	return store.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket([]byte("acache"))
@@ -66,6 +72,7 @@ func (store *Store) InitBucket() error {
 	})
 }
 
+//ListRoutes ListRoutes...
 func (store *Store) ListRoutes() {
 	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
@@ -73,6 +80,7 @@ func (store *Store) ListRoutes() {
 	}
 }
 
+//Info Info...
 func (store *Store) Info() {
 	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
@@ -80,6 +88,7 @@ func (store *Store) Info() {
 	}
 }
 
+//GetRoutes GetRoutes...
 func (store Store) GetRoutes() ([]Route, error) {
 	var cacheItems []Route
 
@@ -106,6 +115,7 @@ func (store Store) GetRoutes() ([]Route, error) {
 	return cacheItems, err
 }
 
+//HasRoute HasRoute...
 func (store *Store) HasRoute(url string) (bool, error) {
 	var hasRoute = false
 
@@ -124,6 +134,7 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	return hasRoute, nil
 }
 
+//AddRoute AddRoute...
 func (store *Store) AddRoute(url string, alias string) error {
 	data, resp, err := fetchJSON(url)
 	key := md5Hash(alias)
@@ -156,6 +167,7 @@ func (store *Store) AddRoute(url string, alias string) error {
 	return err
 }
 
+//ClearDB ClearDB...
 func (store *Store) ClearDB() error {
 	err := store.DB.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(BoltBucketName))
@@ -165,6 +177,7 @@ func (store *Store) ClearDB() error {
 	return err
 }
 
+//StartServer StartServer...
 func (store *Store) StartServer(port string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -178,9 +191,6 @@ func (store *Store) StartServer(port string) error {
 		})
 	}
 
-	if err := router.Run(":" + port); err != nil {
-		return err
-	}
-
-	return nil
+	err := router.Run(":" + port)
+	return err
 }
