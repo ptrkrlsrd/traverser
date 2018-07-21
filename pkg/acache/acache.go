@@ -17,10 +17,14 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
+	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
+	"github.com/ptrkrlsrd/utilities/pkg/unet"
 )
 
 const (
@@ -73,16 +77,21 @@ func (store *Store) InitBucket() error {
 }
 
 //ListRoutes ListRoutes...
-func (store *Store) ListRoutes() {
+func (store *Store) ListRoutes() (string, error) {
+	var output string
 	cacheItems, _ := store.GetRoutes()
 	for i, v := range cacheItems {
-		fmt.Printf("%d) %s -> %s\n", i, v.URL, v.Alias)
+		output += fmt.Sprintf("%d) %s -> %s\n", i, v.URL, v.Alias)
 	}
+	return output, nil
 }
 
 //Info Info...
 func (store *Store) Info() {
-	cacheItems, _ := store.GetRoutes()
+	cacheItems, err := store.GetRoutes()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
@@ -134,10 +143,37 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	return hasRoute, nil
 }
 
+func generateAlias(url string) string {
+	splitURL, _ := unet.SplitUrl(url)
+
+	if len(splitURL) > 1 {
+		return splitURL[1]
+	}
+
+	hash := ucrypt.MD5Hash(url)
+	return hash
+}
+
+func fetchItem(url string) ([]byte, *http.Response, error) {
+	res, err := http.Get(url)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return body, res, nil
+}
+
 //AddRoute AddRoute...
 func (store *Store) AddRoute(url string, alias string) error {
-	data, resp, err := fetchJSON(url)
-	key := md5Hash(alias)
+	data, resp, err := fetchItem(url)
+	key := ucrypt.MD5Hash(alias)
 
 	cacheItem := Route{
 		ID:          key,
