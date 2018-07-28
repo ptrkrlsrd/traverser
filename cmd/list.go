@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ var listCmd = &cobra.Command{
 		routeString, err := store.ListRoutes()
 		if err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 
 		log.Println(routeString)
