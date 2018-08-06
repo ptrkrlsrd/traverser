@@ -12,11 +12,17 @@ func CacheRoute(store *Store) gin.HandlerFunc {
 		var url = req.RequestURI
 
 		go func(url string, store *Store) {
-			var alias = generateAlias(url)
-			log.Println(url, alias)
-			err := store.AddRoute(url, alias)
+			alias, err := generateAlias(url)
 			if err != nil {
 				log.Println(err)
+				return
+			}
+
+			log.Println(url, alias)
+			err = store.AddRoute(url, alias)
+			if err != nil {
+				log.Println(err)
+				return
 			}
 
 			log.Println("cached route", url)

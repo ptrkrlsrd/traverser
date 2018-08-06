@@ -88,6 +88,7 @@ func (store *Store) Info() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	for i, v := range cacheItems {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
@@ -123,7 +124,6 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	var hasRoute = false
 
 	routes, err := store.GetRoutes()
-
 	if err != nil {
 		return false, err
 	}
@@ -137,28 +137,29 @@ func (store *Store) HasRoute(url string) (bool, error) {
 	return hasRoute, nil
 }
 
-func generateAlias(url string) string {
-	splitUrl, _ := unet.SplitUrl(url)
+func generateAlias(url string) (string, error) {
+	splitURL, err := unet.GetURLPath(url)
+	if err != nil {
+		return "", nil
+	}
 
-	if len(splitUrl) > 1 {
-		return splitUrl[1]
+	if len(splitURL) > 1 {
+		return splitURL[1], nil
 	}
 
 	hash := ucrypt.MD5Hash(url)
-	return hash
+	return hash, nil
 }
 
 func fetchItem(url string) ([]byte, *http.Response, error) {
 	res, err := http.Get(url)
-
 	if err != nil {
-		panic(err.Error())
+		return []byte{}, res, err
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
-
 	if err != nil {
-		panic(err.Error())
+		return []byte{}, res, err
 	}
 
 	return body, res, nil
@@ -177,7 +178,6 @@ func (store *Store) AddRoute(url string, alias string) error {
 	}
 
 	jsonData, err := json.Marshal(cacheItem)
-
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,10 @@ func (store *Store) StartServer(port string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	cacheItems, _ := store.GetRoutes()
+	cacheItems, err := store.GetRoutes()
+	if err != nil {
+		return err
+	}
 
 	for _, v := range cacheItems {
 		router.GET(v.Alias, func(c *gin.Context) {
