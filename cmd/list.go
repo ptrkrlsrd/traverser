@@ -16,18 +16,21 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all routes(aliases)",
+	Use:     "list",
+	Short:   "List all routes(aliases)",
+	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
 		routeString, err := store.ListRoutes()
 		if err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 
 		log.Println(routeString)

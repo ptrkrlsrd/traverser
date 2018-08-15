@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -29,6 +30,7 @@ var initCmd = &cobra.Command{
 			log.Println("Sucessfully initialized the database")
 		} else {
 			log.Printf("Failed when trying to initialize DB")
+			os.Exit(1)
 		}
 	},
 }

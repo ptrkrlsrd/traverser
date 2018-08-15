@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,8 @@ var addCmd = &cobra.Command{
 		alias := args[1]
 
 		if err := store.AddRoute(url, alias); err != nil {
-			log.Fatalf("error adding route: %s", err)
+			log.Fatalf("error adding route: %v", err)
+			os.Exit(1)
 		}
 	},
 }
