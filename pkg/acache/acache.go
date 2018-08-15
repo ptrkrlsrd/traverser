@@ -58,9 +58,7 @@ func RouteFromBytes(bytes []byte) (Route, error) {
 
 // NewCache NewCache...
 func NewCache(db *bolt.DB) Store {
-	store := Store{DB: db}
-
-	return store
+	return Store{DB: db}
 }
 
 //InitBucket InitBucket...
