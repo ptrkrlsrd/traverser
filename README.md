@@ -33,7 +33,7 @@ go get https://github.com/ptrkrlsrd/acache/
 ### Add routes
 ```
 acache add <url> <alias>
-acache add https://api.coinmarketcap.com/v1/ticker/ /eth
+acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 ```
 
 # Tech
