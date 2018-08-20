@@ -36,6 +36,13 @@ acache add <url> <alias>
 acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 ```
 
+
+### Server
+```
+$ acache serve
+$ curl localhost:3000/v1/eth
+```
+
 # Tech
 - [Go](https://golang.org/) <3
 - [Cobra](https://github.com/spf13/cobra)
