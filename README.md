@@ -1,7 +1,10 @@
 # Acache
 ### API cacher and server written in Go
-
 ![https://travis-ci.org/ptrkrlsrd/acache.svg?branch=master](https://travis-ci.org/ptrkrlsrd/acache.svg?branch=master)
+
+## What is Acache?
+
+Acache is a tool used for storing responses from endpoints locally, and then serving them from your own computer. This is useful when you want to work on your solutions without access to a certain API.   
 
 ## Usage
 ```
