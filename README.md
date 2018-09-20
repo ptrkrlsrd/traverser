@@ -1,6 +1,7 @@
 # Acache
-### API cacher and server written in Go
 ![https://travis-ci.org/ptrkrlsrd/acache.svg?branch=master](https://travis-ci.org/ptrkrlsrd/acache.svg?branch=master)
+
+### API cacher and server written in Go
 
 ## What is Acache?
 
