@@ -20,14 +20,13 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/coreos/bolt"
+	bolt "github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
-	"github.com/ptrkrlsrd/utilities/pkg/unet"
 )
 
 const (
-	// BoltBucketName BoltBucketName...
+	// BoltBucketName BoltBucketName is the name of the Bolt Bucket
 	BoltBucketName = "acache"
 )
 
@@ -44,6 +43,9 @@ type Route struct {
 type Store struct {
 	DB *bolt.DB
 }
+
+// Routes Routes
+type Routes []Route
 
 // RouteFromBytes RouteFromBytes...
 func RouteFromBytes(bytes []byte) (Route, error) {
@@ -84,17 +86,13 @@ func (store *Store) ListRoutes() (string, error) {
 	for i, v := range cacheItems {
 		output += fmt.Sprintf("%d) %s -> %s\n", i, v.URL, v.Alias)
 	}
+
 	return output, nil
 }
 
-//Info Info...
-func (store *Store) Info() error {
-	cacheItems, err := store.GetRoutes()
-	if err != nil {
-		return err
-	}
-
-	for i, v := range cacheItems {
+//PrintAll PrintAll...
+func (routes *Routes) PrintAll() error {
+	for i, v := range *routes {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
 	}
 
@@ -102,7 +100,7 @@ func (store *Store) Info() error {
 }
 
 //GetRoutes GetRoutes...
-func (store Store) GetRoutes() ([]Route, error) {
+func (store Store) GetRoutes() (Routes, error) {
 	var cacheItems []Route
 
 	err := store.DB.View(func(tx *bolt.Tx) error {
@@ -128,33 +126,14 @@ func (store Store) GetRoutes() ([]Route, error) {
 }
 
 //HasRoute HasRoute...
-func (store *Store) HasRoute(url string) (bool, error) {
-	routes, err := store.GetRoutes()
-	if err != nil {
-		return false, err
-	}
-
-	for _, v := range routes {
+func (routes *Routes) HasRoute(url string) (bool, error) {
+	for _, v := range *routes {
 		if v.URL == url {
 			return true, nil
 		}
 	}
 
 	return false, nil
-}
-
-func generateAlias(url string) (string, error) {
-	splitURL, err := unet.GetURLPath(url)
-	if err != nil {
-		return "", nil
-	}
-
-	if len(splitURL) < 1 {
-		hash := ucrypt.MD5Hash(url)
-		return hash, nil
-	}
-
-	return splitURL[1], nil
 }
 
 func fetchItem(url string) ([]byte, *http.Response, error) {
@@ -191,8 +170,7 @@ func (store *Store) AddRoute(url string, alias string) error {
 			return fmt.Errorf("failed to update the DB. Have you run 'acache init' yet?")
 		}
 
-		err := b.Put([]byte(key), jsonData)
-		return err
+		return b.Put([]byte(key), jsonData)
 	})
 
 	return err
@@ -206,10 +184,11 @@ func (store *Store) ClearDB() error {
 }
 
 //StartServer StartServer...
-func (store *Store) StartServer(port string) error {
+func (store *Store) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	cacheItems, err := store.GetRoutes()
+
 	if err != nil {
 		return fmt.Errorf("could not get routes: %v", err)
 	}
@@ -221,6 +200,5 @@ func (store *Store) StartServer(port string) error {
 		})
 	}
 
-	err = router.Run(":" + port)
-	return err
+	return router.Run(addr)
 }

@@ -15,8 +15,8 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -29,8 +29,7 @@ var initCmd = &cobra.Command{
 		if err := store.InitBucket(); err == nil {
 			log.Println("Sucessfully initialized the database")
 		} else {
-			log.Printf("Failed when trying to initialize DB")
-			os.Exit(1)
+			HandleError(fmt.Errorf("failed when trying to initialize DB"))
 		}
 	},
 }

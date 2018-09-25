@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/coreos/bolt"
@@ -37,12 +36,17 @@ var rootCmd = &cobra.Command{
 	Short: "Simple API cacher and server",
 }
 
+// HandleError Handle and error by printing the error and returning Exit code 1
+func HandleError(err error) {
+	fmt.Println(err)
+	os.Exit(1)
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		HandleError(err)
 	}
 }
 
@@ -65,8 +69,7 @@ func initConfig() {
 		// Search config in home directory with name ".config/acache" (without extension).
 		configPath, err := configPath()
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			HandleError(err)
 		}
 
 		viper.AddConfigPath(configPath)
@@ -86,7 +89,7 @@ func initDB() {
 	expandedPath, err := tilde.Expand(path)
 	db, err := bolt.Open(expandedPath, 0600, nil)
 	if err != nil {
-		log.Fatal(err)
+		HandleError(err)
 	}
 	store = acache.NewCache(db)
 
@@ -94,6 +97,5 @@ func initDB() {
 
 func configPath() (string, error) {
 	path := rootCmd.Flag("config").Value.String()
-	expandedPath, err := tilde.Expand(path)
-	return expandedPath, err
+	return tilde.Expand(path)
 }

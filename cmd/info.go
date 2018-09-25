@@ -15,9 +15,6 @@
 package cmd
 
 import (
-	"log"
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -26,10 +23,12 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Info about the routes",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := store.Info(); err != nil {
-			log.Println(err)
-			os.Exit(1)
+		routes, err := store.GetRoutes()
+		if err != nil {
+			HandleError(err)
 		}
+
+		routes.PrintAll()
 	},
 }
 

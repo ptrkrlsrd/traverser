@@ -14,7 +14,9 @@
 
 package main
 
-import "github.com/ptrkrlsrd/acache/cmd"
+import (
+	"github.com/ptrkrlsrd/acache/cmd"
+)
 
 func main() {
 	cmd.Execute()

@@ -15,8 +15,7 @@
 package cmd
 
 import (
-	"log"
-	"os"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -28,8 +27,7 @@ var clearCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := store.ClearDB()
 		if err != nil {
-			log.Printf("error cleaning database: %s", err)
-			os.Exit(1)
+			HandleError(fmt.Errorf("error cleaning database: %s", err))
 		}
 	},
 }
