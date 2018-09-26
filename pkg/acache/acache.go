@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	bolt "github.com/coreos/bolt"
+	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
 )
@@ -125,8 +125,8 @@ func (store Store) GetRoutes() (Routes, error) {
 	return cacheItems, err
 }
 
-//HasRoute HasRoute...
-func (routes *Routes) HasRoute(url string) (bool, error) {
+//ContainsURL ContainsURL returns true if the slice of routes contains an URL
+func (routes *Routes) ContainsURL(url string) (bool, error) {
 	for _, v := range *routes {
 		if v.URL == url {
 			return true, nil
