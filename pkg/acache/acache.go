@@ -22,7 +22,7 @@ import (
 
 	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
-	"github.com/ptrkrlsrd/utilities/pkg/ucrypt"
+	"github.com/ptrkrlsrd/utilities/ucrypt"
 )
 
 const (
