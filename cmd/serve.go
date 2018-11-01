@@ -45,5 +45,5 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().StringVarP(&port, "port", "p", "3000", "Port")
+	serveCmd.Flags().StringVarP(&port, "port", "p", ":3000", "Port")
 }
