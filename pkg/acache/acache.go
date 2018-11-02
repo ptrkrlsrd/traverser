@@ -1,4 +1,4 @@
-// Copyright © 2018 Petter Karlsrud petterkarlsrud@me.com
+// Copyright © 2018 Petter Karlsrud
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ func (store *Store) ClearDB() error {
 	})
 }
 
-//StartServer StartServer...
+//StartServer Start the API server
 func (store *Store) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
