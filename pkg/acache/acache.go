@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	// BoltBucketName BoltBucketName is the name of the Bolt Bucket
+	// BoltBucketName The name of the Bolt bucket
 	BoltBucketName = "acache"
 )
 
