@@ -27,7 +27,7 @@ import (
 
 var (
 	cfgFile string
-	store   acache.Store
+	service acache.Service
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -91,7 +91,7 @@ func initDB() {
 	if err != nil {
 		HandleError(err)
 	}
-	store = acache.NewCache(db)
+	service = acache.NewService(db)
 }
 
 func configPath() (string, error) {

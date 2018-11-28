@@ -33,7 +33,7 @@ var addCmd = &cobra.Command{
 		url := args[0]
 		alias := args[1]
 
-		if err := store.AddRoute(url, alias); err != nil {
+		if err := service.AddRoute(url, alias); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},

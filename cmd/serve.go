@@ -29,14 +29,14 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Serve the api",
 	Run: func(cmd *cobra.Command, args []string) {
-		routeString, err := store.ListRoutes()
+		routeString, err := service.ListRoutes()
 		if err != nil {
 			HandleError(err)
 		}
 
 		log.Printf("Available routes: \n%s", routeString)
 		log.Printf("Started server on port: %s\n", port)
-		if err := store.StartServer(port); err != nil {
+		if err := service.StartServer(port); err != nil {
 			HandleError(err)
 		}
 	},

@@ -26,7 +26,7 @@ var listCmd = &cobra.Command{
 	Short:   "List all routes(aliases)",
 	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
-		routeString, err := store.ListRoutes()
+		routeString, err := service.ListRoutes()
 		if err != nil {
 			HandleError(err)
 		}

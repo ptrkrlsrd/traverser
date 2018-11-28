@@ -39,8 +39,8 @@ type Route struct {
 	ContentType string `json:"contentType"`
 }
 
-// Store Store..
-type Store struct {
+// Service Service..
+type Service struct {
 	DB *bolt.DB
 }
 
@@ -58,14 +58,14 @@ func RouteFromBytes(bytes []byte) (Route, error) {
 	return cacheItem, nil
 }
 
-// NewCache NewCache...
-func NewCache(db *bolt.DB) Store {
-	return Store{DB: db}
+// NewService New Service
+func NewService(db *bolt.DB) Service {
+	return Service{DB: db}
 }
 
 //InitBucket InitBucket...
-func (store *Store) InitBucket() error {
-	return store.DB.Update(func(tx *bolt.Tx) error {
+func (service *Service) InitBucket() error {
+	return service.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket([]byte("acache"))
 		if err != nil {
 			return fmt.Errorf("failed creating bucket with error: %s", err)
@@ -76,9 +76,9 @@ func (store *Store) InitBucket() error {
 }
 
 //ListRoutes ListRoutes...
-func (store *Store) ListRoutes() (string, error) {
+func (service *Service) ListRoutes() (string, error) {
 	var output string
-	cacheItems, err := store.GetRoutes()
+	cacheItems, err := service.GetRoutes()
 	if err != nil {
 		return "", err
 	}
@@ -100,10 +100,10 @@ func (routes *Routes) PrintAll() error {
 }
 
 //GetRoutes GetRoutes...
-func (store Store) GetRoutes() (Routes, error) {
+func (service Service) GetRoutes() (Routes, error) {
 	var cacheItems []Route
 
-	err := store.DB.View(func(tx *bolt.Tx) error {
+	err := service.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
 			return fmt.Errorf("could not find bucket %s", BoltBucketName)
@@ -147,7 +147,7 @@ func fetchItem(url string) ([]byte, *http.Response, error) {
 }
 
 //AddRoute AddRoute...
-func (store *Store) AddRoute(url string, alias string) error {
+func (service *Service) AddRoute(url string, alias string) error {
 	data, resp, err := fetchItem(url)
 	key := ucrypt.MD5Hash(alias)
 
@@ -164,7 +164,7 @@ func (store *Store) AddRoute(url string, alias string) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	err = store.DB.Update(func(tx *bolt.Tx) error {
+	err = service.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(BoltBucketName))
 		if b == nil {
 			return fmt.Errorf("failed to update the DB. Have you run 'acache init' yet?")
@@ -177,17 +177,17 @@ func (store *Store) AddRoute(url string, alias string) error {
 }
 
 //ClearDB ClearDB...
-func (store *Store) ClearDB() error {
-	return store.DB.Update(func(tx *bolt.Tx) error {
+func (service *Service) ClearDB() error {
+	return service.DB.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket([]byte(BoltBucketName))
 	})
 }
 
 //StartServer Start the API server
-func (store *Store) StartServer(addr string) error {
+func (service *Service) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	cacheItems, err := store.GetRoutes()
+	cacheItems, err := service.GetRoutes()
 
 	if err != nil {
 		return fmt.Errorf("could not get routes: %v", err)
