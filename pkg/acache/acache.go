@@ -20,9 +20,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/coreos/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/ucrypt"
+	bolt "go.etcd.io/bbolt"
 )
 
 const (

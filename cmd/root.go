@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/bolt"
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	bolt "go.etcd.io/bbolt"
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
@@ -92,7 +92,6 @@ func initDB() {
 		HandleError(err)
 	}
 	store = acache.NewCache(db)
-
 }
 
 func configPath() (string, error) {
