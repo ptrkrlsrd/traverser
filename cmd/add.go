@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -33,7 +34,12 @@ var addCmd = &cobra.Command{
 		url := args[0]
 		alias := args[1]
 
-		if err := service.AddRoute(url, alias); err != nil {
+		route, err := service.FetchRoute(url, alias)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := service.AddNewRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},

@@ -21,7 +21,6 @@ import (
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	bolt "go.etcd.io/bbolt"
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
@@ -87,11 +86,17 @@ func initConfig() {
 func initDB() {
 	path := rootCmd.Flag("database").Value.String()
 	expandedPath, err := tilde.Expand(path)
-	db, err := bolt.Open(expandedPath, 0600, nil)
+	db, err := acache.NewDB(expandedPath)
 	if err != nil {
 		HandleError(err)
 	}
-	service = acache.NewService(db)
+
+	storage, err := acache.NewStorage("acache", expandedPath, db)
+	if err != nil {
+		HandleError(err)
+	}
+
+	service = acache.NewService(storage)
 }
 
 func configPath() (string, error) {

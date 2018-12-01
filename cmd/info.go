@@ -23,12 +23,12 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Info about the routes",
 	Run: func(cmd *cobra.Command, args []string) {
-		routes, err := service.GetRoutes()
+		err := service.Storage.GetRoutes()
 		if err != nil {
 			HandleError(err)
 		}
 
-		routes.PrintAll()
+		service.Storage.Routes.PrintInfo()
 	},
 }
 
