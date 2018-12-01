@@ -39,7 +39,7 @@ var addCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if err := service.AddRoute(route); err != nil {
+		if err := service.AddNewRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},

@@ -17,6 +17,7 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,11 +29,22 @@ type Service struct {
 	Storage Storage
 }
 
+// NewService returns a new Service
 func NewService(storage Storage) Service {
 	return Service{Storage: storage}
 }
 
-//AddRoute AddRoute...
+func fetchItem(url string) ([]byte, *http.Response, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	return body, res, err
+}
+
+//FetchRoute fetches data from an URL and returns a Route and an error
 func (service *Service) FetchRoute(url string, alias string) (Route, error) {
 	data, resp, err := fetchItem(url)
 	if err != nil {
@@ -52,8 +64,8 @@ func (service *Service) FetchRoute(url string, alias string) (Route, error) {
 	return route, err
 }
 
-//AddRoute AddRoute...
-func (service *Service) AddRoute(route Route) error {
+// AddNewRoute adds a route to the Storage
+func (service *Service) AddNewRoute(route Route) error {
 	jsonData, err := json.Marshal(route)
 	if err != nil {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
