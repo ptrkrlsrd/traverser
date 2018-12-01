@@ -17,141 +17,31 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/ucrypt"
-	bolt "go.etcd.io/bbolt"
 )
-
-const (
-	// BoltBucketName The name of the Bolt bucket
-	BoltBucketName = "acache"
-)
-
-// Route Route
-type Route struct {
-	ID          string `json:"key"`
-	URL         string `json:"url"`
-	Alias       string `json:"alias"`
-	Data        []byte `json:"data"`
-	ContentType string `json:"contentType"`
-}
 
 // Service Service..
 type Service struct {
-	DB *bolt.DB
+	Storage Storage
 }
 
-// Routes Routes
-type Routes []Route
-
-// RouteFromBytes RouteFromBytes...
-func RouteFromBytes(bytes []byte) (Route, error) {
-	var cacheItem Route
-	err := json.Unmarshal(bytes, &cacheItem)
-	if err != nil {
-		return cacheItem, err
-	}
-
-	return cacheItem, nil
-}
-
-// NewService New Service
-func NewService(db *bolt.DB) Service {
-	return Service{DB: db}
-}
-
-//InitBucket InitBucket...
-func (service *Service) InitBucket() error {
-	return service.DB.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucket([]byte("acache"))
-		if err != nil {
-			return fmt.Errorf("failed creating bucket with error: %s", err)
-		}
-
-		return nil
-	})
-}
-
-//ListRoutes ListRoutes...
-func (service *Service) ListRoutes() (string, error) {
-	var output string
-	cacheItems, err := service.GetRoutes()
-	if err != nil {
-		return "", err
-	}
-
-	for i, v := range cacheItems {
-		output += fmt.Sprintf("%d) %s -> %s\n", i, v.URL, v.Alias)
-	}
-
-	return output, nil
-}
-
-//PrintAll PrintAll...
-func (routes *Routes) PrintAll() error {
-	for i, v := range *routes {
-		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
-	}
-
-	return nil
-}
-
-//GetRoutes GetRoutes...
-func (service Service) GetRoutes() (Routes, error) {
-	var cacheItems []Route
-
-	err := service.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(BoltBucketName))
-		if b == nil {
-			return fmt.Errorf("could not find bucket %s", BoltBucketName)
-		}
-
-		c := b.Cursor()
-
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			if cacheItem, err := RouteFromBytes(v); err == nil {
-				cacheItems = append(cacheItems, cacheItem)
-			} else {
-				return fmt.Errorf("failed reading route from bytes: %v", err)
-			}
-		}
-
-		return nil
-	})
-
-	return cacheItems, err
-}
-
-//ContainsURL ContainsURL returns true if the slice of routes contains an URL
-func (routes *Routes) ContainsURL(url string) (bool, error) {
-	for _, v := range *routes {
-		if v.URL == url {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func fetchItem(url string) ([]byte, *http.Response, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	return body, res, err
+func NewService(storage Storage) Service {
+	return Service{Storage: storage}
 }
 
 //AddRoute AddRoute...
-func (service *Service) AddRoute(url string, alias string) error {
+func (service *Service) FetchRoute(url string, alias string) (Route, error) {
 	data, resp, err := fetchItem(url)
+	if err != nil {
+		return Route{}, nil
+	}
+
 	key := ucrypt.MD5Hash(alias)
 
-	cacheItem := Route{
+	route := Route{
 		ID:          key,
 		URL:         url,
 		Alias:       alias,
@@ -159,41 +49,25 @@ func (service *Service) AddRoute(url string, alias string) error {
 		ContentType: resp.Header.Get("Content-Type"),
 	}
 
-	jsonData, err := json.Marshal(cacheItem)
+	return route, err
+}
+
+//AddRoute AddRoute...
+func (service *Service) AddRoute(route Route) error {
+	jsonData, err := json.Marshal(route)
 	if err != nil {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	err = service.DB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(BoltBucketName))
-		if b == nil {
-			return fmt.Errorf("failed to update the DB. Have you run 'acache init' yet?")
-		}
-
-		return b.Put([]byte(key), jsonData)
-	})
-
-	return err
-}
-
-//ClearDB ClearDB...
-func (service *Service) ClearDB() error {
-	return service.DB.Update(func(tx *bolt.Tx) error {
-		return tx.DeleteBucket([]byte(BoltBucketName))
-	})
+	return service.Storage.Add(route.ID, jsonData)
 }
 
 //StartServer Start the API server
 func (service *Service) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	cacheItems, err := service.GetRoutes()
 
-	if err != nil {
-		return fmt.Errorf("could not get routes: %v", err)
-	}
-
-	for _, v := range cacheItems {
+	for _, v := range service.Storage.Routes {
 		router.GET(v.Alias, func(c *gin.Context) {
 			c.Header("Content-Type", v.ContentType)
 			c.String(http.StatusOK, string(v.Data))
