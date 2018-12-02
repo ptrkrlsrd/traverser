@@ -38,7 +38,7 @@ func (storage *Storage) Init() error {
 	})
 }
 
-//GetRoutes GetRoutes...
+//GetRoutes gets the routes from the Bbolt bucket and sets it [TODO: Return instead of setting]
 func (storage *Storage) GetRoutes() (err error) {
 	var routes Routes
 	err = storage.DB.View(func(tx *bolt.Tx) error {
