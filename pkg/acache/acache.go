@@ -24,7 +24,7 @@ import (
 	"github.com/ptrkrlsrd/utilities/ucrypt"
 )
 
-// Service Service..
+// Service contains the dependencies and handles the logic
 type Service struct {
 	Storage Storage
 }
@@ -74,7 +74,7 @@ func (service *Service) AddNewRoute(route Route) error {
 	return service.Storage.Add(route.ID, jsonData)
 }
 
-//StartServer Start the API server
+//StartServer starts the API server
 func (service *Service) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
