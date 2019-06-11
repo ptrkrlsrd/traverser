@@ -37,8 +37,10 @@ var rootCmd = &cobra.Command{
 
 // HandleError Handle and error by printing the error and returning Exit code 1
 func HandleError(err error) {
-	fmt.Println(err)
-	os.Exit(1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -97,6 +99,7 @@ func initDB() {
 	}
 
 	service = acache.NewService(storage)
+	service.Storage.LoadRoutes()
 }
 
 func configPath() (string, error) {

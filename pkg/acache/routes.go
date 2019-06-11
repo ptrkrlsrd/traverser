@@ -17,15 +17,18 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
 // Route Route
 type Route struct {
-	ID          string `json:"key"`
-	URL         string `json:"url"`
-	Alias       string `json:"alias"`
-	Data        []byte `json:"data"`
-	ContentType string `json:"contentType"`
+	ID     string      `json:"key"`
+	URL    string      `json:"url"`
+	Alias  string      `json:"alias"`
+	Method string      `json:"method"`
+	Data   []byte      `json:"data"`
+	Header http.Header `json:"header"`
 }
 
 // NewRouteFromBytes RouteFromBytes...
@@ -52,6 +55,8 @@ func (routes *Routes) ContainsURL(url string) (bool, error) {
 
 	return false, nil
 }
+
+// ToString converts a route to a string
 func (routes Routes) ToString() string {
 	var output string
 	for i, v := range routes {
@@ -61,13 +66,17 @@ func (routes Routes) ToString() string {
 	return output
 }
 
+// Print prints info about a route
 func (routes Routes) Print() {
 	fmt.Print(routes.ToString())
 }
 
-//PrintAll PrintAll...
+//PrintInfo prints info about all the routes
 func (routes *Routes) PrintInfo() {
 	for i, v := range *routes {
-		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tContent-Type: %s\n", i, v.URL, v.Alias, v.ID, v.ContentType)
+		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.ID, v.Method)
+		for k, h := range v.Header {
+			fmt.Printf("\t\t%s: %s\n", k, strings.Join(h, " "))
+		}
 	}
 }

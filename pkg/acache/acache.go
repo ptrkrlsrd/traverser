@@ -15,13 +15,14 @@
 package acache
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ptrkrlsrd/utilities/ucrypt"
+	"github.com/ptrkrlsrd/utilities/utext"
 )
 
 // Service contains the dependencies and handles the logic
@@ -34,38 +35,52 @@ func NewService(storage Storage) Service {
 	return Service{Storage: storage}
 }
 
-func fetchItem(url string) ([]byte, *http.Response, error) {
-	res, err := http.Get(url)
+func newRoute(url, alias, method string, data []byte, header http.Header) Route {
+	key := utext.MD5Hash(alias)
+	return Route{
+		ID:     key,
+		URL:    url,
+		Alias:  alias,
+		Method: method,
+		Data:   data,
+		Header: header,
+	}
+}
+
+//NewRouteFromPostRequest adds a new route and stores the returned data into the database
+func (service *Service) NewRouteFromPostRequest(url string, alias string, data []byte) (Route, error) {
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		return nil, nil, err
+		return Route{}, err
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
-	return body, res, err
-}
-
-//FetchRoute fetches data from an URL and returns a Route and an error
-func (service *Service) FetchRoute(url string, alias string) (Route, error) {
-	data, resp, err := fetchItem(url)
 	if err != nil {
-		return Route{}, nil
+		return Route{}, err
 	}
 
-	key := ucrypt.MD5Hash(alias)
-
-	route := Route{
-		ID:          key,
-		URL:         url,
-		Alias:       alias,
-		Data:        data,
-		ContentType: resp.Header.Get("Content-Type"),
-	}
-
+	route := newRoute(url, alias, http.MethodPost, body, res.Header)
 	return route, err
 }
 
-// AddNewRoute adds a route to the Storage
-func (service *Service) AddNewRoute(route Route) error {
+//NewRouteFromGetRequest ...
+func (service *Service) NewRouteFromGetRequest(url string, alias string) (Route, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return Route{}, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return Route{}, err
+	}
+
+	route := newRoute(url, alias, http.MethodGet, body, res.Header)
+	return route, err
+}
+
+// StoreRoute adds a route to the Storage
+func (service *Service) StoreRoute(route Route) error {
 	jsonData, err := json.Marshal(route)
 	if err != nil {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
@@ -81,7 +96,9 @@ func (service *Service) StartServer(addr string) error {
 
 	for _, v := range service.Storage.Routes {
 		router.GET(v.Alias, func(c *gin.Context) {
-			c.Header("Content-Type", v.ContentType)
+			for k, h := range v.Header {
+				c.Header(k, h[0])
+			}
 			c.String(http.StatusOK, string(v.Data))
 		})
 	}
