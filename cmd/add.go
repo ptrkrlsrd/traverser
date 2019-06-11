@@ -18,8 +18,21 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 )
+
+var (
+	validHTTPMethods = []string{"GET", "POST"}
+	selectedHTTPMode = "GET"
+	postData         string
+)
+
+func checkError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -34,17 +47,30 @@ var addCmd = &cobra.Command{
 		url := args[0]
 		alias := args[1]
 
-		route, err := service.FetchRoute(url, alias)
-		if err != nil {
-			log.Fatal(err)
+		var route acache.Route
+		var err error
+
+		switch selectedHTTPMode {
+		case "GET":
+			route, err = service.NewRouteFromGetRequest(url, alias)
+			checkError(err)
+		case "POST":
+			if postData == "" {
+				log.Fatal("")
+			}
+
+			route, err = service.NewRouteFromPostRequest(url, alias, []byte(postData))
+			checkError(err)
 		}
 
-		if err := service.AddNewRoute(route); err != nil {
+		if err := service.StoreRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},
 }
 
 func init() {
+	addCmd.PersistentFlags().StringVarP(&selectedHTTPMode, "method", "m", "GET", "")
+	addCmd.PersistentFlags().StringVarP(&postData, "data", "i", "", "")
 	rootCmd.AddCommand(addCmd)
 }
