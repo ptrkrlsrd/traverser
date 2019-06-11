@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/utilities/utext"
@@ -97,7 +98,7 @@ func (service *Service) StartServer(addr string) error {
 	for _, v := range service.Storage.Routes {
 		router.GET(v.Alias, func(c *gin.Context) {
 			for k, h := range v.Header {
-				c.Header(k, h[0])
+				c.Header(k, strings.Join(h, ","))
 			}
 			c.String(http.StatusOK, string(v.Data))
 		})
