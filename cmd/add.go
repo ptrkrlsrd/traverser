@@ -28,10 +28,10 @@ var (
 	postData         string
 )
 
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
+func init() {
+	addCmd.PersistentFlags().StringVarP(&selectedHTTPMode, "method", "m", "GET", "")
+	addCmd.PersistentFlags().StringVarP(&postData, "data", "i", "", "")
+	rootCmd.AddCommand(addCmd)
 }
 
 // addCmd represents the add command
@@ -53,24 +53,18 @@ var addCmd = &cobra.Command{
 		switch selectedHTTPMode {
 		case "GET":
 			route, err = service.NewRouteFromGetRequest(url, alias)
-			checkError(err)
+			HandleError(err)
 		case "POST":
 			if postData == "" {
 				log.Fatal("")
 			}
 
 			route, err = service.NewRouteFromPostRequest(url, alias, []byte(postData))
-			checkError(err)
+			HandleError(err)
 		}
 
 		if err := service.StoreRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},
-}
-
-func init() {
-	addCmd.PersistentFlags().StringVarP(&selectedHTTPMode, "method", "m", "GET", "")
-	addCmd.PersistentFlags().StringVarP(&postData, "data", "i", "", "")
-	rootCmd.AddCommand(addCmd)
 }
