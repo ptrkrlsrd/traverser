@@ -63,11 +63,12 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			if route, err := NewRouteFromBytes(v); err == nil {
-				routes = append(routes, route)
-			} else {
+			route, err := NewRouteFromBytes(v)
+			if err != nil {
 				return fmt.Errorf("failed reading route from bytes: %v", err)
 			}
+			
+			routes = append(routes, route)
 		}
 
 		return nil
