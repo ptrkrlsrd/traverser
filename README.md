@@ -1,4 +1,5 @@
 # Acache
+[![Build Status](https://travis-ci.org/ptrkrlsrd/acache.svg?branch=master)](https://travis-ci.org/ptrkrlsrd/acache)
 ### API cacher and server written in Go
 
 ## What is Acache?
