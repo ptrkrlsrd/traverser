@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
@@ -44,13 +45,15 @@ var addCmd = &cobra.Command{
 		url := args[0]
 		alias := args[1]
 
-		var route acache.Route
-		var err error
+		res, err := http.Get(url)
+		if err != nil {
+			HandleError(err)
+		}
 
-		route, err = service.NewRoute(url, alias)
+		route := acache.NewRoute(url, alias, http.MethodGet, res)
 		HandleError(err)
 
-		if err := service.StoreRoute(route); err != nil {
+		if err := service.Storage.AddRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},

@@ -15,9 +15,6 @@
 package acache
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -28,33 +25,12 @@ type Server struct {
 	Storage Storage
 }
 
-// NewRoute creates a new route from an URL and an alias
-func (service *Server) NewRoute(url string, alias string) (Route, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return Route{}, err
-	}
-
-	route := NewRoute(url, alias, http.MethodGet, res)
-	return route, err
-}
-
-// StoreRoute stores a route to the Bolt DB
-func (server *Server) StoreRoute(route Route) error {
-	jsonData, err := json.Marshal(route)
-	if err != nil {
-		return fmt.Errorf("failed marshaling JSON: %v", err)
-	}
-
-	return server.Storage.Add(route.ID, jsonData)
-}
-
 //StartServer starts the API server
-func (service *Server) StartServer(addr string) error {
+func (server *Server) StartServer(addr string) error {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	for _, r := range service.Storage.Routes {
+	for _, r := range server.Storage.Routes {
 		router.GET(r.Alias, func(c *gin.Context) {
 			for header, v := range r.Response.Header {
 				values := strings.Join(v, ",")

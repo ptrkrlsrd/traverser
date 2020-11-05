@@ -15,6 +15,7 @@
 package acache
 
 import (
+	"encoding/json"
 	"fmt"
 
 	bolt "go.etcd.io/bbolt"
@@ -86,15 +87,20 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 
-// Add adds a route(as bytes) to the database
-func (storage *Storage) Add(key string, data []byte) error {
+// Add adds a route the database
+func (storage *Storage) AddRoute(route Route) error {
+	jsonData, err := json.Marshal(route)
+	if err != nil {
+		return fmt.Errorf("failed marshaling JSON: %v", err)
+	}
+
 	return storage.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(storage.BucketName))
 		if b == nil {
 			return storage.Init()
 		}
 
-		return b.Put([]byte(key), data)
+		return b.Put([]byte(route.ID), jsonData)
 	})
 }
 
