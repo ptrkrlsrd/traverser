@@ -23,7 +23,7 @@ import (
 	"github.com/ptrkrlsrd/utilities/utext"
 )
 
-// Route Route
+// Route contains a route that will be served by the Server
 type Route struct {
 	ID       string           `json:"key"`
 	URL      string           `json:"url"`
@@ -32,6 +32,7 @@ type Route struct {
 	Response StorableResponse `json:"response"`
 }
 
+// NewRoute creates a new route from an URL, Alias, HTTP Method and http.Response
 func NewRoute(url, alias, method string, res *http.Response) Route {
 	key := utext.MD5Hash(alias)
 	response := NewStorableResponse(res)

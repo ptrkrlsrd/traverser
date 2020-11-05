@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// StorableResponse is a copy of http.Response which can be stored as JSON
 type StorableResponse struct {
 	Status     string // e.g. "200 OK"
 	StatusCode int    // e.g. 200
@@ -78,6 +79,7 @@ type StorableResponse struct {
 	Trailer http.Header
 }
 
+// NewStorableResponse maps a http.Response to a StorableResponse
 func NewStorableResponse(httpResponse *http.Response) StorableResponse {
 	defer httpResponse.Body.Close()
 	body, err := ioutil.ReadAll(httpResponse.Body)
