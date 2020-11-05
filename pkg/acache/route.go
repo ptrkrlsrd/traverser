@@ -58,7 +58,7 @@ func NewRouteFromBytes(bytes []byte) (Route, error) {
 	return route, nil
 }
 
-// Routes Routes
+// Routes is a type that represents a slice of Routes
 type Routes []Route
 
 //ContainsURL ContainsURL returns true if the slice of routes contains an URL
