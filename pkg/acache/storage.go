@@ -26,8 +26,8 @@ import (
 type Storage struct {
 	Path       string
 	BucketName string
-	DB         *bolt.DB
 	Routes     Routes
+	db         *bolt.DB
 }
 
 // NewDB creates a new Bolt DB
@@ -43,12 +43,12 @@ func NewDB(path string) (*bolt.DB, error) {
 
 // NewStorage creates a new Storage struct
 func NewStorage(bucketName, path string, db *bolt.DB) (Storage, error) {
-	return Storage{BucketName: bucketName, DB: db}, nil
+	return Storage{BucketName: bucketName, db: db}, nil
 }
 
 // Init Initializes the Bolt database
 func (storage *Storage) Init() error {
-	return storage.DB.Update(func(tx *bolt.Tx) error {
+	return storage.db.Update(func(tx *bolt.Tx) error {
 		if _, err := tx.CreateBucket([]byte(storage.BucketName)); err != nil {
 			return fmt.Errorf("failed creating bucket with error: %v", err)
 		}
@@ -59,7 +59,7 @@ func (storage *Storage) Init() error {
 
 //LoadRoutes loads the routes from the storage
 func (storage *Storage) LoadRoutes() (routes Routes, err error) {
-	err = storage.DB.View(func(tx *bolt.Tx) error {
+	err = storage.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(storage.BucketName))
 		if b == nil {
 			return fmt.Errorf("could not find bucket %s", storage.BucketName)
@@ -93,7 +93,7 @@ func (storage *Storage) AddRoute(route Route) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	return storage.DB.Update(func(tx *bolt.Tx) error {
+	return storage.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(storage.BucketName))
 		if b == nil {
 			return storage.Init()
@@ -105,7 +105,7 @@ func (storage *Storage) AddRoute(route Route) error {
 
 //Clear clears the databse
 func (storage *Storage) Clear() error {
-	return storage.DB.Update(func(tx *bolt.Tx) error {
+	return storage.db.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket([]byte(storage.BucketName))
 	})
 }
