@@ -1,5 +1,6 @@
 # Acache
 ![Go](https://github.com/ptrkrlsrd/acache/workflows/Go/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ptrkrlsrd_acache&metric=alert_status)](https://sonarcloud.io/dashboard?id=ptrkrlsrd_acache)
 ### API cacher and server written in Go
 
 ## What is Acache?
