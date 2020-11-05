@@ -19,27 +19,42 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/ptrkrlsrd/utilities/utext"
 )
 
 // Route Route
 type Route struct {
-	ID     string      `json:"key"`
-	URL    string      `json:"url"`
-	Alias  string      `json:"alias"`
-	Method string      `json:"method"`
-	Data   []byte      `json:"data"`
-	Header http.Header `json:"header"`
+	ID       string           `json:"key"`
+	URL      string           `json:"url"`
+	Alias    string           `json:"alias"`
+	Method   string           `json:"method"`
+	Response StorableResponse `json:"response"`
 }
 
-// NewRouteFromBytes RouteFromBytes...
+func NewRoute(url, alias, method string, res *http.Response) Route {
+	key := utext.MD5Hash(alias)
+	response := NewStorableResponse(res)
+
+	return Route{
+		ID:       key,
+		URL:      url,
+		Alias:    alias,
+		Method:   method,
+		Response: response,
+	}
+}
+
+// NewRouteFromBytes RouteFromBytes creates a new route from a slice of bytes.
+// Used to retrive a route from the database
 func NewRouteFromBytes(bytes []byte) (Route, error) {
-	var routes Route
-	err := json.Unmarshal(bytes, &routes)
+	var route Route
+	err := json.Unmarshal(bytes, &route)
 	if err != nil {
-		return routes, err
+		return route, err
 	}
 
-	return routes, nil
+	return route, nil
 }
 
 // Routes Routes
@@ -75,7 +90,7 @@ func (routes Routes) Print() {
 func (routes *Routes) PrintInfo() {
 	for i, v := range *routes {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.ID, v.Method)
-		for k, h := range v.Header {
+		for k, h := range v.Response.Header {
 			fmt.Printf("\t\t%s: %s\n", k, strings.Join(h, " "))
 		}
 	}

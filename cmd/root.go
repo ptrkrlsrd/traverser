@@ -1,4 +1,4 @@
-// Copyright © 2018 Petter Karlsrud petterkarlsrud@me.com
+// Copyright © 2020 github.com/ptrkrlsrd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 
 var (
 	cfgFile string
-	service acache.Service
+	service acache.Server
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -98,7 +98,7 @@ func initDB() {
 		HandleError(err)
 	}
 
-	service = acache.NewService(storage)
+	service = acache.Server{Storage: storage}
 	service.Storage.LoadRoutes()
 }
 

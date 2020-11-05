@@ -1,4 +1,4 @@
-// Copyright © 2019 Petter Karlsrud
+// Copyright © 2020 github.com/ptrkrlsrd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
+// Storage contains details about the Bolt DB
 type Storage struct {
 	Path       string
 	BucketName string
@@ -28,6 +29,7 @@ type Storage struct {
 	Routes     Routes
 }
 
+// NewDB creates a new Bolt DB
 func NewDB(path string) (*bolt.DB, error) {
 	expandedPath, err := tilde.Expand(path)
 	db, err := bolt.Open(expandedPath, 0600, nil)
@@ -37,6 +39,8 @@ func NewDB(path string) (*bolt.DB, error) {
 
 	return db, nil
 }
+
+// NewStorage creates a new Storage struct
 func NewStorage(bucketName, path string, db *bolt.DB) (Storage, error) {
 	return Storage{BucketName: bucketName, DB: db}, nil
 }
@@ -53,7 +57,7 @@ func (storage *Storage) Init() error {
 	})
 }
 
-//LoadRoutes LoadRoutes...
+//LoadRoutes loads the routes from the storage
 func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 	err = storage.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(storage.BucketName))
@@ -67,7 +71,7 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 			if err != nil {
 				return fmt.Errorf("failed reading route from bytes: %v", err)
 			}
-			
+
 			routes = append(routes, route)
 		}
 
@@ -82,18 +86,19 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 
+// Add adds a route(as bytes) to the database
 func (storage *Storage) Add(key string, data []byte) error {
 	return storage.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(storage.BucketName))
 		if b == nil {
-			return fmt.Errorf("failed to update the DB. Have you run 'acache init' yet?")
+			return storage.Init()
 		}
 
 		return b.Put([]byte(key), data)
 	})
 }
 
-//Clear Clear...
+//Clear clears the databse
 func (storage *Storage) Clear() error {
 	return storage.DB.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket([]byte(storage.BucketName))

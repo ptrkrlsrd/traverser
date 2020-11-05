@@ -1,4 +1,4 @@
-// Copyright © 2018 Petter Karlsrud petterkarlsrud@me.com
+// Copyright © 2020 github.com/ptrkrlsrd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
@@ -24,12 +23,10 @@ import (
 
 var (
 	validHTTPMethods = []string{"GET", "POST"}
-	selectedHTTPMode = "GET"
 	postData         string
 )
 
 func init() {
-	addCmd.PersistentFlags().StringVarP(&selectedHTTPMode, "method", "m", "GET", "")
 	addCmd.PersistentFlags().StringVarP(&postData, "data", "i", "", "")
 	rootCmd.AddCommand(addCmd)
 }
@@ -38,7 +35,7 @@ func init() {
 var addCmd = &cobra.Command{
 	Use: "add",
 	Short: `Add a new route. 
-		Example: "acache add https://api.coinmarketcap.com/v1/ticker/ /eth"
+		Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
 		Here the first argument is the path to the endpoint you want to cache, 
 		and the last is the alias`,
 
@@ -50,18 +47,8 @@ var addCmd = &cobra.Command{
 		var route acache.Route
 		var err error
 
-		switch selectedHTTPMode {
-		case "GET":
-			route, err = service.NewRouteFromGetRequest(url, alias)
-			HandleError(err)
-		case "POST":
-			if postData == "" {
-				log.Fatal("")
-			}
-
-			route, err = service.NewRouteFromPostRequest(url, alias, []byte(postData))
-			HandleError(err)
-		}
+		route, err = service.NewRoute(url, alias)
+		HandleError(err)
 
 		if err := service.StoreRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
