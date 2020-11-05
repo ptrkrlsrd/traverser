@@ -88,8 +88,8 @@ func (routes Routes) Print() {
 }
 
 //PrintInfo prints info about all the routes
-func (routes *Routes) PrintInfo() {
-	for i, v := range *routes {
+func (routes Routes) PrintInfo() {
+	for i, v := range routes {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.ID, v.Method)
 		for k, h := range v.Response.Header {
 			fmt.Printf("\t\t%s: %s\n", k, strings.Join(h, " "))

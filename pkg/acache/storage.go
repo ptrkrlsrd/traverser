@@ -49,8 +49,7 @@ func NewStorage(bucketName, path string, db *bolt.DB) (Storage, error) {
 // Init Initializes the Bolt database
 func (storage *Storage) Init() error {
 	return storage.DB.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucket([]byte(storage.BucketName))
-		if err != nil {
+		if _, err := tx.CreateBucket([]byte(storage.BucketName)); err != nil {
 			return fmt.Errorf("failed creating bucket with error: %v", err)
 		}
 
@@ -87,7 +86,7 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 
-// Add adds a route the database
+// AddRoute adds a route the database
 func (storage *Storage) AddRoute(route Route) error {
 	jsonData, err := json.Marshal(route)
 	if err != nil {
