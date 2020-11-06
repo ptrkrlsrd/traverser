@@ -88,6 +88,10 @@ func (storage *Storage) AddRoute(route Route) error {
 	}
 
 	return storage.db.Update(func(tx *badger.Txn) error {
-		return tx.Set([]byte(route.ID), jsonData)
+		if err := tx.Set([]byte(route.ID), jsonData); err != nil {
+			return fmt.Errorf("failed marshaling JSON: %v", err)
+		}
+
+		return tx.Commit()
 	})
 }
