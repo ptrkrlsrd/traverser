@@ -49,4 +49,4 @@ $ curl localhost:3000/v1/eth
 # Tech
 - [Go](https://golang.org/) <3
 - [Cobra](https://github.com/spf13/cobra)
-- [BoltDB](https://github.com/coreos/bbolt)
+- [Badger DB](https://github.com/dgraph-io/badger)
