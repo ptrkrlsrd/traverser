@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -98,8 +99,12 @@ func initDB() {
 		HandleError(err)
 	}
 
-	service = acache.Server{Storage: storage}
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+
+	service = acache.NewServer(storage, router)
 	service.Storage.LoadRoutes()
+	service.UseStoredRoutes()
 }
 
 func configPath() (string, error) {

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	port string
+	port int
 )
 
 // serveCmd represents the serve command
@@ -30,8 +30,9 @@ var serveCmd = &cobra.Command{
 	Short: "Serve the api",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Available routes: \n%s", service.Storage.Routes.ToString())
-		log.Printf("Started server on port: %s\n", port)
-		if err := service.StartServer(port); err != nil {
+		service.UsePort(port)
+		log.Printf("Started server on port: %d\n", port)
+		if err := service.StartServer(); err != nil {
 			HandleError(err)
 		}
 	},
@@ -39,5 +40,5 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().StringVarP(&port, "port", "p", ":3000", "Port")
+	serveCmd.Flags().IntVarP(&port, "port", "p", 3000, "Port")
 }

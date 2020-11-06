@@ -15,23 +15,40 @@
 package acache
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	DefaultPort = 3000
+)
+
 // Server contains the dependencies and handles the logic
 type Server struct {
 	Storage Storage
+	port    int
+	router  *gin.Engine
 }
 
-//StartServer starts the API server
-func (server *Server) StartServer(addr string) error {
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
+// NewServer creates a new SNewServer
+func NewServer(storage Storage, router *gin.Engine) Server {
+	return Server{
+		Storage: storage,
+		router:  router,
+		port:    DefaultPort,
+	}
+}
 
+func (server *Server) UsePort(port int) {
+	server.port = port
+}
+
+// UseStoredRoutes registers the stored routes to the server
+func (server *Server) UseStoredRoutes() {
 	for _, r := range server.Storage.Routes {
-		router.GET(r.Alias, func(c *gin.Context) {
+		server.router.GET(r.Alias, func(c *gin.Context) {
 			for header, v := range r.Response.Header {
 				values := strings.Join(v, ",")
 				c.Header(header, values)
@@ -40,6 +57,9 @@ func (server *Server) StartServer(addr string) error {
 			c.String(r.Response.StatusCode, string(r.Response.Body))
 		})
 	}
+}
 
-	return router.Run(addr)
+//StartServer starts the API server
+func (server *Server) StartServer() error {
+	return server.router.Run(fmt.Sprintf(":%d", server.port))
 }

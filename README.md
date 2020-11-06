@@ -30,7 +30,7 @@ Use "acache [command] --help" for more information about a command.
 
 ### Installation
 ```
-go get https://github.com/ptrkrlsrd/acache/
+go get github.com/ptrkrlsrd/acache
 ```
 
 ### Add routes
