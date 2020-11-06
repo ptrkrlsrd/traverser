@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	bolt "go.etcd.io/bbolt"
+	badger "github.com/dgraph-io/badger/v2"
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
@@ -27,13 +27,13 @@ type Storage struct {
 	Path       string
 	BucketName string
 	Routes     Routes
-	db         *bolt.DB
+	db         *badger.DB
 }
 
 // NewDB creates a new Bolt DB
-func NewDB(path string) (*bolt.DB, error) {
+func NewDB(path string) (*badger.DB, error) {
 	expandedPath, err := tilde.Expand(path)
-	db, err := bolt.Open(expandedPath, 0600, nil)
+	db, err := badger.Open(badger.DefaultOptions(expandedPath))
 	if err != nil {
 		return nil, err
 	}
@@ -42,39 +42,33 @@ func NewDB(path string) (*bolt.DB, error) {
 }
 
 // NewStorage creates a new Storage struct
-func NewStorage(bucketName, path string, db *bolt.DB) (Storage, error) {
+func NewStorage(bucketName, path string, db *badger.DB) (Storage, error) {
 	return Storage{BucketName: bucketName, db: db}, nil
-}
-
-// Init Initializes the Bolt database
-func (storage *Storage) Init() error {
-	return storage.db.Update(func(tx *bolt.Tx) error {
-		if _, err := tx.CreateBucket([]byte(storage.BucketName)); err != nil {
-			return fmt.Errorf("failed creating bucket with error: %v", err)
-		}
-
-		return nil
-	})
 }
 
 //LoadRoutes loads the routes from the storage
 func (storage *Storage) LoadRoutes() (routes Routes, err error) {
-	err = storage.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(storage.BucketName))
-		if b == nil {
-			return fmt.Errorf("could not find bucket %s", storage.BucketName)
-		}
+	err = storage.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
 
-		c := b.Cursor()
-		for k, v := c.First(); k != nil; k, v = c.Next() {
-			route, err := NewRouteFromBytes(v)
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			err := item.Value(func(v []byte) error {
+				route, err := NewRouteFromBytes(v)
+				if err != nil {
+					return fmt.Errorf("failed reading route from bytes: %v", err)
+				}
+
+				routes = append(routes, route)
+				return nil
+			})
 			if err != nil {
-				return fmt.Errorf("failed reading route from bytes: %v", err)
+				return err
 			}
-
-			routes = append(routes, route)
 		}
-
 		return nil
 	})
 
@@ -93,19 +87,7 @@ func (storage *Storage) AddRoute(route Route) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	return storage.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(storage.BucketName))
-		if b == nil {
-			return storage.Init()
-		}
-
-		return b.Put([]byte(route.ID), jsonData)
-	})
-}
-
-//Clear clears the databse
-func (storage *Storage) Clear() error {
-	return storage.db.Update(func(tx *bolt.Tx) error {
-		return tx.DeleteBucket([]byte(storage.BucketName))
+	return storage.db.Update(func(tx *badger.Txn) error {
+		return tx.Set([]byte(route.ID), jsonData)
 	})
 }
