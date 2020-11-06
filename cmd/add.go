@@ -53,7 +53,7 @@ var addCmd = &cobra.Command{
 		route := acache.NewRoute(url, alias, http.MethodGet, res)
 		HandleError(err)
 
-		if err := service.Storage.AddRoute(route); err != nil {
+		if err := server.Storage.AddRoute(route); err != nil {
 			HandleError(fmt.Errorf("error adding route: %v", err))
 		}
 	},

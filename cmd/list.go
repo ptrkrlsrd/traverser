@@ -24,7 +24,7 @@ var listCmd = &cobra.Command{
 	Short:   "List all routes(aliases)",
 	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
-		service.Storage.Routes.Print()
+		server.Storage.Routes.Print()
 	},
 }
 

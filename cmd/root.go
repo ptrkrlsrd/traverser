@@ -27,7 +27,7 @@ import (
 
 var (
 	cfgFile string
-	service acache.Server
+	server  acache.Server
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -102,9 +102,9 @@ func initDB() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	service = acache.NewServer(storage, router)
-	service.Storage.LoadRoutes()
-	service.UseStoredRoutes()
+	server = acache.NewServer(storage, router)
+	server.Storage.LoadRoutes()
+	server.UseStoredRoutes()
 }
 
 func configPath() (string, error) {

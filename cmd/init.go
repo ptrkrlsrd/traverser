@@ -26,7 +26,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init BoltDB",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := service.Storage.Init(); err == nil {
+		if err := server.Storage.Init(); err == nil {
 			log.Println("Sucessfully initialized the database")
 		} else {
 			HandleError(fmt.Errorf("failed when trying to initialize DB"))
