@@ -16,6 +16,7 @@ var (
 )
 
 func setupTestCase(t *testing.T) func(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode) // Release mode to make gin less verbose
 	router := gin.Default()
 
 	testResponse := http.Response{
