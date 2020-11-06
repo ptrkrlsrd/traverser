@@ -15,12 +15,12 @@
 package acache
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
-
-	"github.com/ptrkrlsrd/utilities/utext"
 )
 
 // Route contains a route that will be served by the Server
@@ -34,7 +34,7 @@ type Route struct {
 
 // NewRoute creates a new route from an URL, Alias, HTTP Method and http.Response
 func NewRoute(url, alias, method string, res *http.Response) Route {
-	key := utext.MD5Hash(alias)
+	key := createKey(alias)
 	response := NewStorableResponse(res)
 
 	return Route{
@@ -44,6 +44,13 @@ func NewRoute(url, alias, method string, res *http.Response) Route {
 		Method:   method,
 		Response: response,
 	}
+}
+
+func createKey(alias string) string {
+	sha1er := sha1.New()
+	sha1er.Write([]byte(alias))
+	key := hex.EncodeToString(sha1er.Sum(nil))
+	return key
 }
 
 // NewRouteFromBytes RouteFromBytes creates a new route from a slice of bytes.
