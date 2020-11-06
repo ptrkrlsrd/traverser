@@ -13,10 +13,8 @@ Usage:
 
 Available Commands:
   add         Add a new route
-  clear       Clear the database
   help        Help about any command
   info        Info about the routes
-  init        Init BoltDB
   list        List all routes(aliases)
   serve       
 
