@@ -1,9 +1,9 @@
 module github.com/ptrkrlsrd/acache
 
-go 1.14
+go 1.15
 
 require (
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.0
 	github.com/ptrkrlsrd/utilities v0.0.0-20190704204357-f0ecc1449e20
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
