@@ -69,14 +69,14 @@ func NewRouteFromBytes(bytes []byte) (Route, error) {
 type Routes []Route
 
 //ContainsURL ContainsURL returns true if the slice of routes contains an URL
-func (routes *Routes) ContainsURL(url string) (bool, error) {
+func (routes *Routes) ContainsURL(url string) bool {
 	for _, v := range *routes {
 		if v.URL == url {
-			return true, nil
+			return true
 		}
 	}
 
-	return false, nil
+	return false
 }
 
 // ToString converts a route to a string

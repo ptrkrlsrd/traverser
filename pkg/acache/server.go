@@ -16,6 +16,7 @@ package acache
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,7 @@ type Server struct {
 	router  *gin.Engine
 }
 
-// NewServer creates a new SNewServer
+// NewServer creates a new NewServer
 func NewServer(storage Storage, router *gin.Engine) Server {
 	return Server{
 		Storage: storage,
@@ -48,15 +49,36 @@ func (server *Server) UsePort(port int) {
 // UseStoredRoutes registers the stored routes to the server
 func (server *Server) UseStoredRoutes() {
 	for _, r := range server.Storage.Routes {
-		server.router.GET(r.Alias, func(c *gin.Context) {
+		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
-				values := strings.Join(v, ",")
-				c.Header(header, values)
+				c.Header(header, strings.Join(v, ","))
 			}
 
 			c.String(r.Response.StatusCode, string(r.Response.Body))
-		})
+		}
+
+		server.router.GET(r.Alias, handler)
 	}
+}
+
+func (server *Server) UseProxyRoute() {
+	handler := func(c *gin.Context) {
+		go func(url string) {
+			if server.Storage.Routes.ContainsURL(url) {
+				return
+			}
+
+			route, err := NewRouteFromRequest(url, url)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			server.Storage.AddRoute(route)
+		}(c.Request.URL.String())
+	}
+
+	server.router.GET("/", handler)
 }
 
 //StartServer starts the API server
