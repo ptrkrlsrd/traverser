@@ -31,7 +31,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Available routes: \n%s", server.Storage.Routes.ToString())
 		server.UsePort(port)
-		server.UseStoredRoutes()
+		server.RegisterStoredRoutes()
 		log.Printf("Started server on port: %d\n", port)
 		if err := server.StartServer(); err != nil {
 			HandleError(err)

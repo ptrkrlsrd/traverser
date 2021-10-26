@@ -31,8 +31,10 @@ var proxyCmd = &cobra.Command{
 		proxyURL := args[0]
 
 		log.Printf("Available routes: \n%s", server.Storage.Routes.ToString())
+
 		server.UsePort(port)
-		server.ProxyRoute(proxyURL)
+		server.RegisterProxyHandler(proxyURL)
+
 		log.Printf("Started server on port: %d\n", port)
 		if err := server.StartServer(); err != nil {
 			HandleError(err)

@@ -48,8 +48,8 @@ func (server *Server) UsePort(port int) {
 	server.port = port
 }
 
-// UseStoredRoutes registers the stored routes to the server
-func (server *Server) UseStoredRoutes() {
+// RegisterStoredRoutes registers the stored routes to the server
+func (server *Server) RegisterStoredRoutes() {
 	for _, r := range server.Storage.Routes {
 		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
@@ -64,7 +64,7 @@ func (server *Server) UseStoredRoutes() {
 }
 
 // UseProxyRoute creates a catch all route which intercepts all API calls
-func (server *Server) ProxyRoute(proxyURL string) {
+func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 	proxyHandler := func(c *gin.Context) {
 		remote, err := url.Parse(proxyURL)
 		if err != nil {
@@ -96,7 +96,11 @@ func (server *Server) ProxyRoute(proxyURL string) {
 		proxy.ServeHTTP(c.Writer, c.Request)
 	}
 
-	server.router.NoRoute(proxyHandler)
+	return proxyHandler
+}
+
+func (server *Server) RegisterProxyHandler(proxyURL string) {
+	server.router.NoRoute(server.proxyRoute(proxyURL))
 }
 
 //StartServer starts the API server
