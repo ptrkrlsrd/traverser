@@ -1,4 +1,4 @@
-// Copyright © 2019 Petter Karlsrud
+// Copyright © 2021 Petter Karlsrud
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
