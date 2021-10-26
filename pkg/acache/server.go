@@ -16,7 +16,9 @@ package acache
 
 import (
 	"fmt"
-	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -61,24 +63,40 @@ func (server *Server) UseStoredRoutes() {
 	}
 }
 
-func (server *Server) UseProxyRoute() {
-	handler := func(c *gin.Context) {
-		go func(url string) {
-			if server.Storage.Routes.ContainsURL(url) {
+// UseProxyRoute creates a catch all route which intercepts all API calls
+func (server *Server) ProxyRoute(proxyURL string) {
+	proxyHandler := func(c *gin.Context) {
+		remote, err := url.Parse(proxyURL)
+		if err != nil {
+			c.AbortWithError(500, err)
+		}
+
+		proxy := httputil.NewSingleHostReverseProxy(remote)
+		proxy.Director = func(req *http.Request) {
+			req.Header = c.Request.Header
+			req.Host = remote.Host
+			req.URL.Scheme = remote.Scheme
+			req.URL.Host = remote.Host
+			req.URL.Path = c.Param("proxyPath")
+
+			if server.Storage.Routes.ContainsURL(proxyURL) {
 				return
 			}
 
-			route, err := NewRouteFromRequest(url, url)
+			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
+			route, err := NewRouteFromRequest(replacedURL, c.Request.URL.Path)
 			if err != nil {
-				log.Println(err)
+				c.AbortWithError(500, err)
 				return
 			}
 
 			server.Storage.AddRoute(route)
-		}(c.Request.URL.String())
+		}
+
+		proxy.ServeHTTP(c.Writer, c.Request)
 	}
 
-	server.router.GET("/", handler)
+	server.router.NoRoute(proxyHandler)
 }
 
 //StartServer starts the API server

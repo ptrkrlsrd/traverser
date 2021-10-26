@@ -15,23 +15,24 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
 )
 
-var (
-	port int
-)
-
 // serveCmd represents the serve command
-var serveCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Serve the api",
+var proxyCmd = &cobra.Command{
+	Use:   "proxy",
+	Short: "Start the server as a proxy between you and another API",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(args)
+		proxyURL := args[0]
+
 		log.Printf("Available routes: \n%s", server.Storage.Routes.ToString())
 		server.UsePort(port)
-		server.UseStoredRoutes()
+		server.ProxyRoute(proxyURL)
 		log.Printf("Started server on port: %d\n", port)
 		if err := server.StartServer(); err != nil {
 			HandleError(err)
@@ -40,6 +41,6 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().IntVarP(&port, "port", "p", 4000, "Port")
+	rootCmd.AddCommand(proxyCmd)
+	proxyCmd.Flags().IntVarP(&port, "port", "p", 4000, "Port")
 }

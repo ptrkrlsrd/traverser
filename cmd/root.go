@@ -104,7 +104,6 @@ func initDB() {
 
 	server = acache.NewServer(storage, router)
 	server.Storage.LoadRoutes()
-	server.UseStoredRoutes()
 }
 
 func configPath() (string, error) {
