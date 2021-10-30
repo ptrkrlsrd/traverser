@@ -1,4 +1,4 @@
-// Copyright © 2020 github.com/ptrkrlsrd
+// Copyright © 2021 github.com/ptrkrlsrd
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -94,10 +94,8 @@ func initDB() {
 		HandleError(err)
 	}
 
-	if _, err = os.Stat(expandedConfigPath); os.IsNotExist(err) {
-		if err := os.Mkdir(expandedConfigPath, os.ModePerm); err != nil {
-			HandleError(err)
-		}
+	if err = checkOrCreateFolder(expandedConfigPath); err != nil {
+		HandleError(err)
 	}
 
 	db, err := acache.NewDB(path.Join(expandedConfigPath, "acache.db"))
@@ -115,6 +113,13 @@ func initDB() {
 
 	server = acache.NewServer(storage, router)
 	server.Storage.LoadRoutes()
+}
+
+func checkOrCreateFolder(expandedConfigPath string) error {
+	if _, err := os.Stat(expandedConfigPath); os.IsNotExist(err) {
+		return os.Mkdir(expandedConfigPath, os.ModePerm)
+	}
+	return nil
 }
 
 func configPath() (string, error) {
