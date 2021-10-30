@@ -33,6 +33,10 @@ type Storage struct {
 // NewDB creates a new Bolt DB
 func NewDB(path string) (*badger.DB, error) {
 	expandedPath, err := tilde.Expand(path)
+	if err != nil {
+		return nil, err
+	}
+
 	db, err := badger.Open(badger.DefaultOptions(expandedPath))
 	if err != nil {
 		return nil, err

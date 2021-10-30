@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ptrkrlsrd/acache/pkg/acache"
@@ -55,7 +56,7 @@ func Execute() {
 func init() {
 	// Set the flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
-	rootCmd.PersistentFlags().StringP("database", "d", "~/.config/acache/acache.db", "Database")
+	rootCmd.PersistentFlags().StringP("database", "d", "~/.config/acache/", "Database")
 
 	// Initialize the database and config
 	cobra.OnInitialize(initConfig)
@@ -87,14 +88,24 @@ func initConfig() {
 }
 
 func initDB() {
-	path := rootCmd.Flag("database").Value.String()
-	expandedPath, err := tilde.Expand(path)
-	db, err := acache.NewDB(expandedPath)
+	pathVariable := rootCmd.Flag("database").Value.String()
+	expandedConfigPath, err := tilde.Expand(pathVariable)
 	if err != nil {
 		HandleError(err)
 	}
 
-	storage, err := acache.NewStorage("acache", expandedPath, db)
+	if _, err = os.Stat(expandedConfigPath); os.IsNotExist(err) {
+		if err := os.Mkdir(expandedConfigPath, os.ModePerm); err != nil {
+			HandleError(err)
+		}
+	}
+
+	db, err := acache.NewDB(path.Join(expandedConfigPath, "acache.db"))
+	if err != nil {
+		HandleError(err)
+	}
+
+	storage, err := acache.NewStorage("acache", expandedConfigPath, db)
 	if err != nil {
 		HandleError(err)
 	}
