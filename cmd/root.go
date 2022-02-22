@@ -89,6 +89,10 @@ func initConfig() {
 func initDB() {
 	path := rootCmd.Flag("database").Value.String()
 	expandedPath, err := tilde.Expand(path)
+	if err != nil {
+		HandleError(err)
+	}
+
 	db, err := acache.NewDB(expandedPath)
 	if err != nil {
 		HandleError(err)
