@@ -49,8 +49,8 @@ func (server *Server) UsePort(port int) {
 }
 
 // UseStoredRoutes registers the stored routes to the server
-func (server *Server) UseStoredRoutes() {
-	for _, r := range server.Storage.Routes {
+func (server *Server) MapRoutes(routes []Route) {
+	for _, r := range routes {
 		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
 				c.Header(header, strings.Join(v, ","))
@@ -78,10 +78,6 @@ func (server *Server) ProxyRoute(proxyURL string) {
 			req.URL.Scheme = remote.Scheme
 			req.URL.Host = remote.Host
 			req.URL.Path = c.Param("proxyPath")
-
-			if server.Storage.Routes.ContainsURL(proxyURL) {
-				return
-			}
 
 			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
 			route, err := NewRouteFromRequest(replacedURL, c.Request.URL.Path)

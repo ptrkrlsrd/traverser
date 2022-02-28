@@ -26,14 +26,19 @@ import (
 type Storage struct {
 	Path       string
 	BucketName string
-	Routes     Routes
 	db         *badger.DB
 }
 
 // NewDB creates a new Bolt DB
 func NewDB(path string) (*badger.DB, error) {
 	expandedPath, err := tilde.Expand(path)
-	db, err := badger.Open(badger.DefaultOptions(expandedPath))
+	if err != nil {
+		return nil, err
+	}
+
+	opts := badger.DefaultOptions(expandedPath)
+	opts.Logger = nil
+	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -95,11 +100,10 @@ func (storage *Storage) AddRoute(route Route) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	return storage.db.Update(func(tx *badger.Txn) error {
-		if err := tx.Set([]byte(route.ID), jsonData); err != nil {
-			return fmt.Errorf("failed marshaling JSON: %v", err)
-		}
-
-		return tx.Commit()
+	err = storage.db.Update(func(txn *badger.Txn) error {
+		err = txn.Set([]byte(route.Alias), jsonData)
+		return err
 	})
+
+	return err
 }

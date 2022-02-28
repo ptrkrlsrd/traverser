@@ -107,7 +107,6 @@ func initDB() {
 	router := gin.Default()
 
 	server = acache.NewServer(storage, router)
-	server.Storage.LoadRoutes()
 }
 
 func configPath() (string, error) {
