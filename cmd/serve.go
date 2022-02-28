@@ -24,10 +24,10 @@ var (
 	port int
 )
 
-// serveCmd represents the serve command
+// serveCmd serves the stored routes
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Serve the api",
+	Short: "Load the stored routes from cache and serve the API",
 	Run: func(cmd *cobra.Command, args []string) {
 		server.UsePort(port)
 		routes, err := server.Storage.LoadRoutes()

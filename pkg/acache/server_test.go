@@ -33,7 +33,7 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	}
 
 	server = NewServer(Storage{Routes: routes}, router)
-	server.UseStoredRoutes()
+	server.MapRoutes(routes)
 
 	return func(t *testing.T) {
 		t.Log("teardown test case")

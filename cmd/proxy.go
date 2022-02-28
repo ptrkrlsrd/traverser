@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// serveCmd represents the serve command
+// proxyCmd proxies the stored routes
 var proxyCmd = &cobra.Command{
 	Use:   "proxy",
 	Short: "Start the server as a proxy between you and another API",

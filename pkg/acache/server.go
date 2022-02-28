@@ -35,7 +35,7 @@ type Server struct {
 	router  *gin.Engine
 }
 
-// NewServer creates a new NewServer
+// NewServer creates a new server
 func NewServer(storage Storage, router *gin.Engine) Server {
 	return Server{
 		Storage: storage,
@@ -44,12 +44,13 @@ func NewServer(storage Storage, router *gin.Engine) Server {
 	}
 }
 
+// UsePort sets the port to listen on
 func (server *Server) UsePort(port int) {
 	server.port = port
 }
 
 // UseStoredRoutes registers the stored routes to the server
-func (server *Server) MapRoutes(routes []Route) {
+func (server *Server) MapRoutes(routes Routes) {
 	for _, r := range routes {
 		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
@@ -79,8 +80,9 @@ func (server *Server) ProxyRoute(proxyURL string) {
 			req.URL.Host = remote.Host
 			req.URL.Path = c.Param("proxyPath")
 
-			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
-			route, err := NewRouteFromRequest(replacedURL, c.Request.URL.Path)
+			originalURL := c.Request.URL.Path
+			replacedURL := fmt.Sprintf("%s%s", proxyURL, originalURL)
+			route, err := NewRouteFromRequest(replacedURL, originalURL)
 			if err != nil {
 				c.AbortWithError(500, err)
 				return
