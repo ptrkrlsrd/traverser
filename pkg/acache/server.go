@@ -16,6 +16,9 @@ package acache
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +35,7 @@ type Server struct {
 	router  *gin.Engine
 }
 
-// NewServer creates a new NewServer
+// NewServer creates a new server
 func NewServer(storage Storage, router *gin.Engine) Server {
 	return Server{
 		Storage: storage,
@@ -41,13 +44,14 @@ func NewServer(storage Storage, router *gin.Engine) Server {
 	}
 }
 
+// UsePort sets the port to listen on
 func (server *Server) UsePort(port int) {
 	server.port = port
 }
 
-// RegisterStoredRoutes registers the stored routes to the server
-func (server *Server) RegisterStoredRoutes() {
-	for _, r := range server.Storage.Routes {
+// UseStoredRoutes registers the stored routes to the server
+func (server *Server) MapRoutes(routes Routes) {
+	for _, r := range routes {
 		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
 				c.Header(header, strings.Join(v, ","))
@@ -58,6 +62,39 @@ func (server *Server) RegisterStoredRoutes() {
 
 		server.router.GET(r.Alias, handler)
 	}
+}
+
+// UseProxyRoute creates a catch all route which intercepts all API calls
+func (server *Server) ProxyRoute(proxyURL string) {
+	proxyHandler := func(c *gin.Context) {
+		remote, err := url.Parse(proxyURL)
+		if err != nil {
+			c.AbortWithError(500, err)
+		}
+
+		proxy := httputil.NewSingleHostReverseProxy(remote)
+		proxy.Director = func(req *http.Request) {
+			req.Header = c.Request.Header
+			req.Host = remote.Host
+			req.URL.Scheme = remote.Scheme
+			req.URL.Host = remote.Host
+			req.URL.Path = c.Param("proxyPath")
+
+			originalURL := c.Request.URL.Path
+			replacedURL := fmt.Sprintf("%s%s", proxyURL, originalURL)
+			route, err := NewRouteFromRequest(replacedURL, originalURL)
+			if err != nil {
+				c.AbortWithError(500, err)
+				return
+			}
+
+			server.Storage.AddRoute(route)
+		}
+
+		proxy.ServeHTTP(c.Writer, c.Request)
+	}
+
+	server.router.NoRoute(proxyHandler)
 }
 
 //StartServer starts the API server

@@ -22,8 +22,7 @@ import (
 )
 
 var (
-	validHTTPMethods = []string{"GET", "POST"}
-	postData         string
+	postData string
 )
 
 func init() {

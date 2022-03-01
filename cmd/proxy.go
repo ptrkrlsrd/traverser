@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// serveCmd represents the serve command
+// proxyCmd proxies the stored routes
 var proxyCmd = &cobra.Command{
 	Use:   "proxy",
 	Short: "Start the server as a proxy between you and another API",
@@ -30,11 +30,13 @@ var proxyCmd = &cobra.Command{
 		fmt.Println(args)
 		proxyURL := args[0]
 
-		log.Printf("Available routes: \n%s", server.Storage.Routes.ToString())
-
+		routes, err := server.Storage.LoadRoutes()
+		if err != nil {
+			HandleError(err)
+		}
+		routes.Print()
 		server.UsePort(port)
-		server.RegisterProxyHandler(proxyURL)
-
+		server.ProxyRoute(proxyURL)
 		log.Printf("Started server on port: %d\n", port)
 		if err := server.StartServer(); err != nil {
 			HandleError(err)

@@ -39,10 +39,6 @@ func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 			req.URL.Host = remote.Host
 			req.URL.Path = c.Param("proxyPath")
 
-			if server.Storage.Routes.ContainsURL(proxyURL) {
-				return
-			}
-
 			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
 			route, err := NewRouteFromRequest(replacedURL, c.Request.URL.Path)
 			if err != nil {

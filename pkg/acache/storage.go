@@ -26,7 +26,6 @@ import (
 type Storage struct {
 	Path       string
 	BucketName string
-	Routes     Routes
 	db         *badger.DB
 }
 
@@ -37,7 +36,9 @@ func NewDB(path string) (*badger.DB, error) {
 		return nil, err
 	}
 
-	db, err := badger.Open(badger.DefaultOptions(expandedPath))
+	opts := badger.DefaultOptions(expandedPath)
+	opts.Logger = nil
+	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -58,30 +59,38 @@ func (storage *Storage) LoadRoutes() (routes Routes, err error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
-			item := it.Item()
-			err := item.Value(func(v []byte) error {
-				route, err := NewRouteFromBytes(v)
-				if err != nil {
-					return fmt.Errorf("failed reading route from bytes: %v", err)
-				}
-
-				routes = append(routes, route)
-				return nil
-			})
+		routeData, err := readBytesFromIterator(it)
+		for _, v := range routeData {
+			route, err := NewRouteFromBytes(v)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed reading route from bytes: %v", err)
 			}
+
+			routes = append(routes, route)
 		}
-		return nil
+		return err
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	storage.Routes = routes
 	return routes, nil
+}
+
+func readBytesFromIterator(it *badger.Iterator) ([][]byte, error) {
+	data := [][]byte{}
+	for it.Rewind(); it.Valid(); it.Next() {
+		item := it.Item()
+		err := item.Value(func(v []byte) error {
+			data = append(data, v)
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return data, nil
 }
 
 // AddRoute adds a route the database
@@ -91,11 +100,10 @@ func (storage *Storage) AddRoute(route Route) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	return storage.db.Update(func(tx *badger.Txn) error {
-		if err := tx.Set([]byte(route.ID), jsonData); err != nil {
-			return fmt.Errorf("failed marshaling JSON: %v", err)
-		}
-
-		return tx.Commit()
+	err = storage.db.Update(func(txn *badger.Txn) error {
+		err = txn.Set([]byte(route.Alias), jsonData)
+		return err
 	})
+
+	return err
 }

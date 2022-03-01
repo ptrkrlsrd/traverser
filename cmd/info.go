@@ -18,12 +18,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// infoCmd represents the info command
+// infoCmd prints route information
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Info about the routes",
+	Short: "Print route information",
 	Run: func(cmd *cobra.Command, args []string) {
-		server.Storage.Routes.PrintInfo()
+		routes, err := server.Storage.LoadRoutes()
+		if err != nil {
+			HandleError(err)
+		}
+		routes.PrintInfo()
 	},
 }
 
