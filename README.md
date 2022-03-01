@@ -6,7 +6,7 @@
 
 Acache is a tool used for storing responses from endpoints locally, and then serving them from your own computer. This is useful when you want to work on your solutions without access to a certain API when you're for example offline.  
 
-## Usage
+## CLI
 ```
 API response recorder
 
@@ -38,20 +38,19 @@ Use "acache [command] --help" for more information about a command.
 go get github.com/ptrkrlsrd/acache
 ```
 
-### Add routes
+### Usage
+* Add routes
 ```
 acache add <url> <alias>
 acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 ```
 
-
-### Server
-Start the server by running:
+* Start the server by running:
 ```
 $ acache serve
 ```
 
-### Perform curl against aliased routes served by Acache
+* Perform curl against aliased routes served by Acache
 ```
 $ curl localhost:3000/v1/eth
 ```
