@@ -46,9 +46,14 @@ acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 
 
 ### Server
+Start the server by running:
 ```
 $ acache serve
-$ curl localhost:3000/v1/eth
+```
+
+### Perform curl against aliased routes served by Acache
+```
+$ curl localhost:3000/v1/eth
 ```
 
 # Tech
