@@ -8,19 +8,26 @@ Acache is a tool used for storing responses from endpoints locally, and then ser
 
 ## Usage
 ```
+API response recorder
+
 Usage:
   acache [command]
 
 Available Commands:
-  add         Add a new route
+  add         Add a new route. 
+                Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
+                Here the first argument is the path to the endpoint you want to cache, 
+                and the last is the alias
+  completion  generate the autocompletion script for the specified shell
   help        Help about any command
-  info        Info about the routes
+  info        Print route information
   list        List all routes(aliases)
-  serve       
+  proxy       Start the server as a proxy between you and another API
+  serve       Load the stored routes from cache and serve the API
 
 Flags:
       --config string     Config file (default "~/.config/acache/acache.json")
-  -d, --database string   Database (default "~/.config/acache/acache.db")
+  -d, --database string   Database (default "~/.config/acache/")
   -h, --help              help for acache
 
 Use "acache [command] --help" for more information about a command.
