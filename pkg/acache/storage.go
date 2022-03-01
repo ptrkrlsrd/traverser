@@ -27,8 +27,8 @@ type Store interface {
 	AddRoute(Route) error
 }
 
-// Storage contains details about the Bolt DB
-type Storage struct {
+// badgerStorage is a wrapper around badger.DB that implements the Store interface
+type badgerStorage struct {
 	db *badger.DB
 }
 
@@ -51,11 +51,11 @@ func NewDB(path string) (*badger.DB, error) {
 
 // NewStorage creates a new Storage struct
 func NewStorage(path string, db *badger.DB) (Store, error) {
-	return &Storage{db: db}, nil
+	return &badgerStorage{db: db}, nil
 }
 
 //LoadRoutes loads the routes from the storage
-func (storage *Storage) LoadRoutes() (routes Routes, err error) {
+func (storage *badgerStorage) LoadRoutes() (routes Routes, err error) {
 	err = storage.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
@@ -97,7 +97,7 @@ func readBytesFromIterator(it *badger.Iterator) ([][]byte, error) {
 }
 
 // AddRoute adds a route the database
-func (storage *Storage) AddRoute(route Route) error {
+func (storage *badgerStorage) AddRoute(route Route) error {
 	jsonData, err := json.Marshal(route)
 	if err != nil {
 		return fmt.Errorf("failed marshaling JSON: %v", err)

@@ -34,7 +34,7 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "acache",
-	Short: "Simple API cacher and server",
+	Short: "API response recorder",
 }
 
 // HandleError Handle and error by printing the error and returning Exit code 1
