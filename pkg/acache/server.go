@@ -50,7 +50,7 @@ func (server *Server) UsePort(port int) {
 }
 
 // UseStoredRoutes registers the stored routes to the server
-func (server *Server) MapRoutes(routes Routes) {
+func (server *Server) RegisterRoutes(routes Routes) {
 	for _, r := range routes {
 		handler := func(c *gin.Context) {
 			for header, v := range r.Response.Header {
@@ -65,7 +65,7 @@ func (server *Server) MapRoutes(routes Routes) {
 }
 
 // UseProxyRoute creates a catch all route which intercepts all API calls
-func (server *Server) ProxyRoute(proxyURL string) {
+func (server *Server) RegisterProxyRoute(proxyURL string) {
 	proxyHandler := func(c *gin.Context) {
 		remote, err := url.Parse(proxyURL)
 		if err != nil {
@@ -82,7 +82,7 @@ func (server *Server) ProxyRoute(proxyURL string) {
 
 			originalURL := c.Request.URL.Path
 			replacedURL := fmt.Sprintf("%s%s", proxyURL, originalURL)
-			route, err := NewRouteFromRequest(replacedURL, originalURL)
+			route, err := NewRouteFromURL(replacedURL, originalURL)
 			if err != nil {
 				c.AbortWithError(500, err)
 				return

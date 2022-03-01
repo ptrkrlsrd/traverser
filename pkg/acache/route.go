@@ -32,8 +32,7 @@ type Route struct {
 	Response StorableResponse `json:"response"`
 }
 
-// NewRoute creates a new route from an URL, Alias, HTTP Method and http.Response
-func NewRoute(url, alias, method string, res *http.Response) Route {
+func NewRouteFromResponse(url, alias, method string, res *http.Response) Route {
 	key := createKey(alias)
 	response := NewStorableResponse(res)
 
@@ -41,9 +40,27 @@ func NewRoute(url, alias, method string, res *http.Response) Route {
 		ID:       key,
 		URL:      url,
 		Alias:    alias,
-		Method:   method,
+		Method:   http.MethodGet,
 		Response: response,
 	}
+}
+
+func NewRouteFromURL(url string, alias string) (Route, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return Route{}, err
+	}
+
+	key := createKey(alias)
+	response := NewStorableResponse(res)
+
+	return Route{
+		ID:       key,
+		URL:      url,
+		Alias:    alias,
+		Method:   http.MethodGet,
+		Response: response,
+	}, nil
 }
 
 func createKey(alias string) string {
@@ -79,7 +96,7 @@ func (routes *Routes) ContainsURL(url string) bool {
 	return false
 }
 
-// ToString converts a route to a string
+// ToString converts a slice of routes to a string with a newline to make printing easier
 func (routes Routes) ToString() string {
 	var output string
 	for i, v := range routes {
@@ -89,7 +106,7 @@ func (routes Routes) ToString() string {
 	return output
 }
 
-// Print prints info about a route
+// Print prints info about a slice of routes
 func (routes Routes) Print() {
 	fmt.Print(routes.ToString())
 }

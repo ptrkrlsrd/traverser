@@ -19,7 +19,7 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode) // Release mode to make gin less verbose
 	router := gin.New()          // TODO: Figure out if its okay to use New here instead of Default
 
-	testResponse := http.Response{
+	testResponse := &http.Response{
 		Status:     "200 OK",
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(strings.NewReader("Hello world!")),
@@ -29,11 +29,11 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	testResponse.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	routes := Routes{
-		NewRoute("/test", "/alias/test", "GET", &testResponse),
+		NewRouteFromResponse("/test", "/alias/test", http.MethodGet, testResponse),
 	}
 
-	server = NewServer(Storage{Routes: routes}, router)
-	server.MapRoutes(routes)
+	server = NewServer(Storage{}, router)
+	server.RegisterRoutes(routes)
 
 	return func(t *testing.T) {
 		t.Log("teardown test case")

@@ -35,7 +35,7 @@ var serveCmd = &cobra.Command{
 			HandleError(err)
 		}
 		routes.Print()
-		server.MapRoutes(routes)
+		server.RegisterRoutes(routes)
 		log.Printf("Started server on port: %d\n", port)
 		if err := server.StartServer(); err != nil {
 			HandleError(err)

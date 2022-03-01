@@ -40,7 +40,7 @@ func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 			req.URL.Path = c.Param("proxyPath")
 
 			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
-			route, err := NewRouteFromRequest(replacedURL, c.Request.URL.Path)
+			route, err := NewRouteFromURL(replacedURL, c.Request.URL.Path)
 			if err != nil {
 				c.AbortWithError(500, err)
 				return
