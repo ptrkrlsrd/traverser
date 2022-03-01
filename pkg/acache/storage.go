@@ -22,11 +22,14 @@ import (
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
+type Store interface {
+	LoadRoutes() (routes Routes, err error)
+	AddRoute(Route) error
+}
+
 // Storage contains details about the Bolt DB
 type Storage struct {
-	Path       string
-	BucketName string
-	db         *badger.DB
+	db *badger.DB
 }
 
 // NewDB creates a new Bolt DB
@@ -47,8 +50,8 @@ func NewDB(path string) (*badger.DB, error) {
 }
 
 // NewStorage creates a new Storage struct
-func NewStorage(bucketName, path string, db *badger.DB) (Storage, error) {
-	return Storage{BucketName: bucketName, db: db}, nil
+func NewStorage(path string, db *badger.DB) (Store, error) {
+	return &Storage{db: db}, nil
 }
 
 //LoadRoutes loads the routes from the storage

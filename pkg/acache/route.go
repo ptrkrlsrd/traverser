@@ -32,9 +32,12 @@ type Route struct {
 	Response StorableResponse `json:"response"`
 }
 
-func NewRouteFromResponse(url, alias, method string, res *http.Response) Route {
+func NewRouteFromResponse(url, alias, method string, res *http.Response) (Route, error) {
 	key := createKey(alias)
-	response := NewStorableResponse(res)
+	response, err := NewStorableResponse(res)
+	if err != nil {
+		return Route{}, err
+	}
 
 	return Route{
 		ID:       key,
@@ -42,7 +45,7 @@ func NewRouteFromResponse(url, alias, method string, res *http.Response) Route {
 		Alias:    alias,
 		Method:   http.MethodGet,
 		Response: response,
-	}
+	}, nil
 }
 
 func NewRouteFromURL(url string, alias string) (Route, error) {
@@ -52,7 +55,10 @@ func NewRouteFromURL(url string, alias string) (Route, error) {
 	}
 
 	key := createKey(alias)
-	response := NewStorableResponse(res)
+	response, err := NewStorableResponse(res)
+	if err != nil {
+		return Route{}, err
+	}
 
 	return Route{
 		ID:       key,

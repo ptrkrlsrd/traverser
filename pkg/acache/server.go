@@ -30,17 +30,17 @@ const (
 
 // Server contains the dependencies and handles the logic
 type Server struct {
-	Storage Storage
-	port    int
-	router  *gin.Engine
+	Store  Store
+	port   int
+	router *gin.Engine
 }
 
 // NewServer creates a new server
-func NewServer(storage Storage, router *gin.Engine) Server {
+func NewServer(store Store, router *gin.Engine) Server {
 	return Server{
-		Storage: storage,
-		router:  router,
-		port:    DefaultPort,
+		Store:  store,
+		router: router,
+		port:   DefaultPort,
 	}
 }
 
@@ -88,7 +88,7 @@ func (server *Server) RegisterProxyRoute(proxyURL string) {
 				return
 			}
 
-			server.Storage.AddRoute(route)
+			server.Store.AddRoute(route)
 		}
 
 		proxy.ServeHTTP(c.Writer, c.Request)

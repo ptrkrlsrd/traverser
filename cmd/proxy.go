@@ -30,7 +30,7 @@ var proxyCmd = &cobra.Command{
 		fmt.Println(args)
 		proxyURL := args[0]
 
-		routes, err := server.Storage.LoadRoutes()
+		routes, err := server.Store.LoadRoutes()
 		if err != nil {
 			HandleError(err)
 		}

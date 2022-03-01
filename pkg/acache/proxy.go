@@ -46,7 +46,7 @@ func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 				return
 			}
 
-			server.Storage.AddRoute(route)
+			server.Store.AddRoute(route)
 		}
 
 		proxy.ServeHTTP(c.Writer, c.Request)

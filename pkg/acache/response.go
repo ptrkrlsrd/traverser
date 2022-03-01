@@ -80,11 +80,11 @@ type StorableResponse struct {
 }
 
 // NewStorableResponse maps a http.Response to a StorableResponse
-func NewStorableResponse(httpResponse *http.Response) StorableResponse {
+func NewStorableResponse(httpResponse *http.Response) (StorableResponse, error) {
 	defer httpResponse.Body.Close()
 	body, err := ioutil.ReadAll(httpResponse.Body)
 	if err != nil {
-		return StorableResponse{}
+		return StorableResponse{}, err
 	}
 
 	return StorableResponse{
@@ -99,5 +99,5 @@ func NewStorableResponse(httpResponse *http.Response) StorableResponse {
 		TransferEncoding: httpResponse.TransferEncoding,
 		Uncompressed:     httpResponse.Uncompressed,
 		Trailer:          httpResponse.Trailer,
-	}
+	}, nil
 }

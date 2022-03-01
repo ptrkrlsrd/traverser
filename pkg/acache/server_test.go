@@ -15,6 +15,19 @@ var (
 	server Server
 )
 
+type MockStorage struct {
+	routes Routes
+}
+
+func (ms *MockStorage) LoadRoutes() (routes Routes, err error) {
+	return routes, nil
+}
+
+func (ms *MockStorage) AddRoute(route Route) error {
+	ms.routes = append(ms.routes, route)
+	return nil
+}
+
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode) // Release mode to make gin less verbose
 	router := gin.New()          // TODO: Figure out if its okay to use New here instead of Default
@@ -28,11 +41,15 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 
 	testResponse.Header.Add("Content-Type", "application/json; charset=utf-8")
 
-	routes := Routes{
-		NewRouteFromResponse("/test", "/alias/test", http.MethodGet, testResponse),
+	route, err := NewRouteFromResponse("/test", "/alias/test", http.MethodGet, testResponse)
+	if err != nil {
+		t.Fail()
 	}
 
-	server = NewServer(Storage{}, router)
+	routes := Routes{route}
+	mockStorage := &MockStorage{}
+
+	server = NewServer(mockStorage, router)
 	server.RegisterRoutes(routes)
 
 	return func(t *testing.T) {

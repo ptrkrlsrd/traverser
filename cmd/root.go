@@ -103,7 +103,7 @@ func initDB() {
 		HandleError(err)
 	}
 
-	storage, err := acache.NewStorage("acache", expandedConfigPath, db)
+	storage, err := acache.NewStorage(expandedConfigPath, db)
 	if err != nil {
 		HandleError(err)
 	}

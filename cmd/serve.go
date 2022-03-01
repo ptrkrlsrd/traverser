@@ -30,7 +30,7 @@ var serveCmd = &cobra.Command{
 	Short: "Load the stored routes from cache and serve the API",
 	Run: func(cmd *cobra.Command, args []string) {
 		server.UsePort(port)
-		routes, err := server.Storage.LoadRoutes()
+		routes, err := server.Store.LoadRoutes()
 		if err != nil {
 			HandleError(err)
 		}
