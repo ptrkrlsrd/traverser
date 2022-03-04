@@ -1,7 +1,7 @@
 package acache
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -9,8 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ProxyRoute struct {
+	OriginalURL string
+	Alias       string
+}
+
 // UseProxyRoute creates a catch all route which intercepts all API calls
-func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
+func (server *Server) proxyHandleFunc(proxyURL string, newRouteChan chan (ProxyRoute)) func(*gin.Context) {
 	proxyHandler := func(c *gin.Context) {
 		remote, err := url.Parse(proxyURL)
 		if err != nil {
@@ -23,16 +28,11 @@ func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 			req.Host = remote.Host
 			req.URL.Scheme = remote.Scheme
 			req.URL.Host = remote.Host
-			req.URL.Path = c.Param("proxyPath")
 
-			replacedURL := fmt.Sprintf("%s%s", proxyURL, c.Request.URL.Path)
-			route, err := NewRouteFromURL(replacedURL, c.Request.URL.Path)
-			if err != nil {
-				c.AbortWithError(500, err)
-				return
-			}
+			proxyPath := c.Request.RequestURI
+			req.URL.Path = proxyPath
 
-			server.Store.AddRoute(route)
+			newRouteChan <- ProxyRoute{req.URL.String(), c.Request.URL.Path}
 		}
 
 		proxy.ServeHTTP(c.Writer, c.Request)
@@ -41,6 +41,20 @@ func (server *Server) proxyRoute(proxyURL string) func(*gin.Context) {
 	return proxyHandler
 }
 
+func listenAndHandleProxyRoutes(proxyRouteChan chan (ProxyRoute), store RouteStorer) {
+	for {
+		proxyRoute := <-proxyRouteChan
+		route, err := NewRouteFromURL(proxyRoute.OriginalURL, proxyRoute.Alias)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		store.AddRoute(route)
+	}
+}
+
 func (server *Server) RegisterProxyHandler(proxyURL string) {
-	server.router.NoRoute(server.proxyRoute(proxyURL))
+	proxyRouteChan := make(chan ProxyRoute)
+	go listenAndHandleProxyRoutes(proxyRouteChan, server.Store)
+	server.router.NoRoute(server.proxyHandleFunc(proxyURL, proxyRouteChan))
 }

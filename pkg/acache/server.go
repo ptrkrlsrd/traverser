@@ -2,9 +2,6 @@ package acache
 
 import (
 	"fmt"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -48,39 +45,6 @@ func (server *Server) RegisterRoutes(routes Routes) {
 
 		server.router.GET(r.Alias, handler)
 	}
-}
-
-// UseProxyRoute creates a catch all route which intercepts all API calls
-func (server *Server) RegisterProxyRoute(proxyURL string) {
-	proxyHandler := func(c *gin.Context) {
-		remote, err := url.Parse(proxyURL)
-		if err != nil {
-			c.AbortWithError(500, err)
-		}
-
-		proxy := httputil.NewSingleHostReverseProxy(remote)
-		proxy.Director = func(req *http.Request) {
-			req.Header = c.Request.Header
-			req.Host = remote.Host
-			req.URL.Scheme = remote.Scheme
-			req.URL.Host = remote.Host
-			req.URL.Path = c.Param("proxyPath")
-
-			originalURL := c.Request.URL.Path
-			replacedURL := fmt.Sprintf("%s%s", proxyURL, originalURL)
-			route, err := NewRouteFromURL(replacedURL, originalURL)
-			if err != nil {
-				c.AbortWithError(500, err)
-				return
-			}
-
-			server.Store.AddRoute(route)
-		}
-
-		proxy.ServeHTTP(c.Writer, c.Request)
-	}
-
-	server.router.NoRoute(proxyHandler)
 }
 
 //Start starts the API server

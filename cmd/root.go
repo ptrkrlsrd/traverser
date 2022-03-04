@@ -13,9 +13,8 @@ import (
 )
 
 var (
-	cfgFile                   string
-	server                    acache.Server
-	enableExperimenalFeatures = false
+	cfgFile string
+	server  acache.Server
 )
 
 // rootCmd represents the base command when called without any subcommands

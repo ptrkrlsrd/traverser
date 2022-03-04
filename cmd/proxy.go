@@ -23,7 +23,7 @@ var proxyCmd = &cobra.Command{
 		}
 
 		server.UsePort(port)
-		server.RegisterProxyRoute(proxyURL)
+		server.RegisterProxyHandler(proxyURL)
 		log.Printf("Started server on port: %d\n", port)
 		err := server.Start()
 		HandleError(err)
@@ -31,8 +31,6 @@ var proxyCmd = &cobra.Command{
 }
 
 func init() {
-	if enableExperimenalFeatures {
-		rootCmd.AddCommand(proxyCmd)
-	}
+	rootCmd.AddCommand(proxyCmd)
 	proxyCmd.Flags().IntVarP(&port, "port", "p", 4000, "Port")
 }
