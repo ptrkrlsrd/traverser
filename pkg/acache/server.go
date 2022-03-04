@@ -16,13 +16,13 @@ const (
 
 // Server contains the dependencies and handles the logic
 type Server struct {
-	Store  Store
+	Store  RouteStorer
 	port   int
 	router *gin.Engine
 }
 
 // NewServer creates a new server
-func NewServer(store Store, router *gin.Engine) Server {
+func NewServer(store RouteStorer, router *gin.Engine) Server {
 	return Server{
 		Store:  store,
 		router: router,

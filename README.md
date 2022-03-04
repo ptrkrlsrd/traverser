@@ -22,7 +22,6 @@ Available Commands:
   help        Help about any command
   info        Print route information
   list        List all routes(aliases)
-  proxy       Start the server as a proxy between you and another API
   serve       Load the stored routes from cache and serve the API
 
 Flags:

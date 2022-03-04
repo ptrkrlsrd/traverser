@@ -31,6 +31,8 @@ var proxyCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(proxyCmd)
+	if enableExperimenalFeatures {
+		rootCmd.AddCommand(proxyCmd)
+	}
 	proxyCmd.Flags().IntVarP(&port, "port", "p", 4000, "Port")
 }

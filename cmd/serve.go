@@ -16,7 +16,7 @@ var serveCmd = &cobra.Command{
 	Short: "Load the stored routes from cache and serve the API",
 	Run: func(cmd *cobra.Command, args []string) {
 		server.UsePort(port)
-		routes, err := server.Store.LoadRoutes()
+		routes, err := server.Store.GetRoutes()
 		HandleError(err)
 
 		routes.Print()

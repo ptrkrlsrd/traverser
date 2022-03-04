@@ -19,7 +19,7 @@ type MockStorage struct {
 	routes Routes
 }
 
-func (ms *MockStorage) LoadRoutes() (routes Routes, err error) {
+func (ms *MockStorage) GetRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 

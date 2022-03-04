@@ -8,18 +8,13 @@ import (
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
-type Store interface {
-	LoadRoutes() (routes Routes, err error)
-	AddRoute(Route) error
-}
-
 // badgerStorage is a wrapper around badger.DB that implements the Store interface
 type badgerStorage struct {
 	db *badger.DB
 }
 
-// NewDB creates a new Bolt DB
-func NewDB(path string) (*badger.DB, error) {
+// NewBadgerDB creates a new Badger DB
+func NewBadgerDB(path string) (*badger.DB, error) {
 	expandedPath, err := tilde.Expand(path)
 	if err != nil {
 		return nil, err
@@ -30,13 +25,13 @@ func NewDB(path string) (*badger.DB, error) {
 	return badger.Open(opts)
 }
 
-// NewStorage creates a new Storage struct
-func NewStorage(db *badger.DB) (Store, error) {
+// NewBadgerStorage creates a new Storage struct
+func NewBadgerStorage(db *badger.DB) (RouteStorer, error) {
 	return &badgerStorage{db: db}, nil
 }
 
-//LoadRoutes loads the routes from the storage
-func (storage *badgerStorage) LoadRoutes() (routes Routes, err error) {
+//GetRoutes loads the routes from the storage and returns them
+func (storage *badgerStorage) GetRoutes() (routes Routes, err error) {
 	err = storage.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10

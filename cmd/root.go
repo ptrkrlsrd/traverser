@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	cfgFile string
-	server  acache.Server
+	cfgFile                   string
+	server                    acache.Server
+	enableExperimenalFeatures = false
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -78,10 +79,10 @@ func initDB() {
 	checkOrCreateFolder(expandedConfigPath)
 	HandleError(err)
 
-	db, err := acache.NewDB(path.Join(expandedConfigPath, "acache.db"))
+	db, err := acache.NewBadgerDB(path.Join(expandedConfigPath, "acache.db"))
 	HandleError(err)
 
-	storage, err := acache.NewStorage(db)
+	storage, err := acache.NewBadgerStorage(db)
 	HandleError(err)
 
 	gin.SetMode(gin.ReleaseMode)
