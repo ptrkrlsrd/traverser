@@ -27,16 +27,11 @@ func NewDB(path string) (*badger.DB, error) {
 
 	opts := badger.DefaultOptions(expandedPath)
 	opts.Logger = nil
-	db, err := badger.Open(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return badger.Open(opts)
 }
 
 // NewStorage creates a new Storage struct
-func NewStorage(path string, db *badger.DB) (Store, error) {
+func NewStorage(db *badger.DB) (Store, error) {
 	return &badgerStorage{db: db}, nil
 }
 

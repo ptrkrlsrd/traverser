@@ -17,15 +17,14 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		server.UsePort(port)
 		routes, err := server.Store.LoadRoutes()
-		if err != nil {
-			HandleError(err)
-		}
+		HandleError(err)
+
 		routes.Print()
 		server.RegisterRoutes(routes)
+
 		log.Printf("Started server on port: %d\n", port)
-		if err := server.StartServer(); err != nil {
-			HandleError(err)
-		}
+		err = server.Start()
+		HandleError(err)
 	},
 }
 

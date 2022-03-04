@@ -83,7 +83,7 @@ func (server *Server) RegisterProxyRoute(proxyURL string) {
 	server.router.NoRoute(proxyHandler)
 }
 
-//StartServer starts the API server
-func (server *Server) StartServer() error {
+//Start starts the API server
+func (server *Server) Start() error {
 	return server.router.Run(fmt.Sprintf(":%d", server.port))
 }

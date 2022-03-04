@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/spf13/cobra"
 )
@@ -10,23 +11,22 @@ import (
 // proxyCmd proxies the stored routes
 var proxyCmd = &cobra.Command{
 	Use:   "proxy",
-	Short: "Start the server as a proxy between you and another API",
-	Args:  cobra.MinimumNArgs(1),
+	Short: "Start Acache as a proxy between you and another API and save the responses locally",
+	Long: `Start Acache as a proxy between you and another API and save the responses locally. 
+	Example: acache proxy https://pokeapi.co/api/v2/pokemon.`,
+	Args: cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
 		proxyURL := args[0]
-
-		routes, err := server.Store.LoadRoutes()
-		if err != nil {
-			HandleError(err)
+		re := regexp.MustCompile(`^(http|https)://.+`)
+		if !re.MatchString(proxyURL) {
+			HandleError(fmt.Errorf("invalid URL: %s", proxyURL))
 		}
-		routes.Print()
+
 		server.UsePort(port)
 		server.RegisterProxyRoute(proxyURL)
 		log.Printf("Started server on port: %d\n", port)
-		if err := server.StartServer(); err != nil {
-			HandleError(err)
-		}
+		err := server.Start()
+		HandleError(err)
 	},
 }
 

@@ -34,9 +34,8 @@ func HandleError(err error) {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		HandleError(err)
-	}
+	err := rootCmd.Execute()
+	HandleError(err)
 }
 
 func init() {
@@ -56,10 +55,8 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Search config in home directory with name ".config/acache" (without extension).
-		configPath, err := configPath()
-		if err != nil {
-			HandleError(err)
-		}
+		configPath, err := tilde.Expand(rootCmd.Flag("config").Value.String())
+		HandleError(err)
 
 		viper.AddConfigPath(configPath)
 		viper.SetConfigName("config")
@@ -76,27 +73,19 @@ func initConfig() {
 func initDB() {
 	pathVariable := rootCmd.Flag("database").Value.String()
 	expandedConfigPath, err := tilde.Expand(pathVariable)
-	if err != nil {
-		HandleError(err)
-	}
+	HandleError(err)
 
-	if err = checkOrCreateFolder(expandedConfigPath); err != nil {
-		HandleError(err)
-	}
+	checkOrCreateFolder(expandedConfigPath)
+	HandleError(err)
 
 	db, err := acache.NewDB(path.Join(expandedConfigPath, "acache.db"))
-	if err != nil {
-		HandleError(err)
-	}
+	HandleError(err)
 
-	storage, err := acache.NewStorage(expandedConfigPath, db)
-	if err != nil {
-		HandleError(err)
-	}
+	storage, err := acache.NewStorage(db)
+	HandleError(err)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-
 	server = acache.NewServer(storage, router)
 }
 
@@ -105,9 +94,4 @@ func checkOrCreateFolder(expandedConfigPath string) error {
 		return os.Mkdir(expandedConfigPath, os.ModePerm)
 	}
 	return nil
-}
-
-func configPath() (string, error) {
-	path := rootCmd.Flag("config").Value.String()
-	return tilde.Expand(path)
 }

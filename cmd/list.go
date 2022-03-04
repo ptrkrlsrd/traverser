@@ -11,9 +11,7 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
 		routes, err := server.Store.LoadRoutes()
-		if err != nil {
-			HandleError(err)
-		}
+		HandleError(err)
 		routes.Print()
 	},
 }
