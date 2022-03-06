@@ -38,7 +38,7 @@ func (storage *badgerStorage) GetRoutes() (routes Routes, err error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		routeData, err := readBytesFromIterator(it)
+		routeData, err := bytesFromIterator(it)
 		for _, v := range routeData {
 			route, err := NewRouteFromBytes(v)
 			if err != nil {
@@ -57,7 +57,8 @@ func (storage *badgerStorage) GetRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 
-func readBytesFromIterator(it *badger.Iterator) ([][]byte, error) {
+// bytesFromIterator iterates over the iterator and returns a slice of bytes
+func bytesFromIterator(it *badger.Iterator) ([][]byte, error) {
 	data := [][]byte{}
 	for it.Rewind(); it.Valid(); it.Next() {
 		item := it.Item()
