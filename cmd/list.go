@@ -10,9 +10,7 @@ var listCmd = &cobra.Command{
 	Short:   "List all routes(aliases)",
 	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
-		routes, err := server.Store.GetRoutes()
-		HandleError(err)
-		routes.Print()
+		server.PrintRoutes()
 	},
 }
 

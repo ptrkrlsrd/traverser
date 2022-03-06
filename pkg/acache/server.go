@@ -2,18 +2,20 @@ package acache
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 const (
+	// DefaultPort is the default port to listen on
 	DefaultPort = 4000
 )
 
 // Server contains the dependencies and handles the logic
 type Server struct {
-	Store  RouteStorer
+	store  RouteStorer
 	port   int
 	router *gin.Engine
 }
@@ -21,7 +23,7 @@ type Server struct {
 // NewServer creates a new server
 func NewServer(store RouteStorer, router *gin.Engine) Server {
 	return Server{
-		Store:  store,
+		store:  store,
 		router: router,
 		port:   DefaultPort,
 	}
@@ -45,6 +47,40 @@ func (server *Server) RegisterRoutes(routes Routes) {
 
 		server.router.GET(r.Alias, handler)
 	}
+}
+
+// AddRoute adds a route to the server
+func (server *Server) AddRoute(route Route) error {
+	return server.store.AddRoute(route)
+}
+
+func (server *Server) LoadRoutes() error {
+	routes, err := server.store.GetRoutes()
+	if err != nil {
+		return err
+	}
+
+	server.RegisterRoutes(routes)
+	return nil
+
+}
+
+// PrintRoutes prints all routes to the console
+func (server *Server) PrintRoutes() {
+	routes, err := server.store.GetRoutes()
+	if err != nil {
+		log.Println(err)
+	}
+	routes.Print()
+}
+
+// PrintRouteInfo prints the route info to the console
+func (server *Server) PrintRouteInfo() {
+	routes, err := server.store.GetRoutes()
+	if err != nil {
+		log.Println(err)
+	}
+	routes.PrintInfo()
 }
 
 //Start starts the API server

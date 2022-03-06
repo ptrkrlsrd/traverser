@@ -79,10 +79,8 @@ func (storage *badgerStorage) AddRoute(route Route) error {
 		return fmt.Errorf("failed marshaling JSON: %v", err)
 	}
 
-	err = storage.db.Update(func(txn *badger.Txn) error {
+	return storage.db.Update(func(txn *badger.Txn) error {
 		err = txn.Set([]byte(route.Alias), jsonData)
 		return err
 	})
-
-	return err
 }

@@ -55,6 +55,6 @@ func listenAndHandleProxyRoutes(proxyRouteChan chan (ProxyRoute), store RouteSto
 
 func (server *Server) RegisterProxyHandler(proxyURL string) {
 	proxyRouteChan := make(chan ProxyRoute)
-	go listenAndHandleProxyRoutes(proxyRouteChan, server.Store)
+	go listenAndHandleProxyRoutes(proxyRouteChan, server.store)
 	server.router.NoRoute(server.proxyHandleFunc(proxyURL, proxyRouteChan))
 }
