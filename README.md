@@ -39,12 +39,20 @@ go install github.com/ptrkrlsrd/acache@latest
 ```
 
 ### Usage
+#### Approach 1. Manually entering routes
 * Add routes
 ```
 acache add <url> <alias>
 acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 ```
+#### Approach 2. Using Acache as a proxy to store incoming API requests
+```
+acache proxy https://api.coinmarketcap.com/
+```
+This will create a proxy between you and the API which you can call by for example running `curl localhost:3000/v1/eth` which internally fetches `https://api.coinmarketcap.com/v1/ticker/eth` and stores the response into BadgerDB.
 
+
+### Serving the stored API endpoints
 * Start the server by running:
 ```
 $ acache serve
@@ -59,3 +67,4 @@ $ curl localhost:3000/v1/eth
 - [Go](https://golang.org/) <3
 - [Cobra](https://github.com/spf13/cobra)
 - [Badger DB](https://github.com/dgraph-io/badger)
+- I would also thank Github CoPilot for awesome suggestions while creating this tool
