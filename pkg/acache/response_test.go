@@ -9,11 +9,12 @@ import (
 )
 
 func TestStorableResponse(t *testing.T) {
+	testBody := "Hello world!"
 	status := "200 OK"
 	testResponse := &http.Response{
 		Status:     status,
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(strings.NewReader("Hello world!")),
+		Body:       ioutil.NopCloser(strings.NewReader(testBody)),
 		Header:     http.Header{},
 	}
 
@@ -31,8 +32,8 @@ func TestStorableResponse(t *testing.T) {
 		t.Fatalf("Expected status '200 ok' got %v", resp.Status)
 	}
 
-	if string(resp.Body) != "Hello world!" {
-		t.Fatalf("Expected status 'Hello world!' got %v", resp.Body)
+	if string(resp.Body) != testBody {
+		t.Fatalf("Expected status '%s' got %v", testBody, resp.Body)
 	}
 }
 
