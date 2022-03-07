@@ -34,18 +34,35 @@ func (server *Server) UsePort(port int) {
 	server.port = port
 }
 
+// routeHandler handles the route
+func routeHandler(route Route) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		for header, v := range route.Response.Header {
+			c.Header(header, strings.Join(v, ","))
+		}
+
+		c.String(route.Response.StatusCode, string(route.Response.Body))
+	}
+}
+
+func containsRoute(url string, routes gin.RoutesInfo) bool {
+	for _, v := range routes {
+		if v.Path == url {
+			return true
+		}
+	}
+
+	return false
+}
+
 // UseStoredRoutes registers the stored routes to the server
 func (server *Server) RegisterRoutes(routes Routes) {
 	for _, r := range routes {
-		handler := func(c *gin.Context) {
-			for header, v := range r.Response.Header {
-				c.Header(header, strings.Join(v, ","))
-			}
-
-			c.String(r.Response.StatusCode, string(r.Response.Body))
+		if containsRoute(r.Alias, server.router.Routes()) {
+			continue
 		}
+		server.router.GET(r.Alias, routeHandler(r))
 
-		server.router.GET(r.Alias, handler)
 	}
 }
 
@@ -54,6 +71,7 @@ func (server *Server) AddRoute(route Route) error {
 	return server.store.AddRoute(route)
 }
 
+// LoadRoutes loads the routes from the store
 func (server *Server) LoadRoutes() error {
 	routes, err := server.store.GetRoutes()
 	if err != nil {
