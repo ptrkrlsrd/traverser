@@ -35,7 +35,7 @@ Use "acache [command] --help" for more information about a command.
 
 ### Installation
 ```
-go get github.com/ptrkrlsrd/acache
+go install github.com/ptrkrlsrd/acache@latest
 ```
 
 ### Usage
