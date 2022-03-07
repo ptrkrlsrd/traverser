@@ -55,7 +55,7 @@ func containsRoute(url string, routes gin.RoutesInfo) bool {
 	return false
 }
 
-// UseStoredRoutes registers the stored routes to the server
+// RegisterRoutes registers the stored routes to the server
 func (server *Server) RegisterRoutes(routes Routes) {
 	for _, r := range routes {
 		if containsRoute(r.Alias, server.router.Routes()) {
