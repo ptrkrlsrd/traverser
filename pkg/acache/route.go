@@ -9,7 +9,7 @@ import (
 
 // Route contains a route that will be served by the Server
 type Route struct {
-	ID       id               `json:"key"`
+	ID       cacheKey         `json:"key"`
 	URL      string           `json:"url"`
 	Alias    string           `json:"alias"`
 	Method   string           `json:"method"`
@@ -27,7 +27,7 @@ func NewRouteFromResponse(url, alias, method string, res *http.Response) (Route,
 		return Route{}, err
 	}
 
-	key, err := NewID(alias, req)
+	key, err := NewCacheKey(alias, req)
 	if err != nil {
 		return Route{}, err
 	}
@@ -58,7 +58,7 @@ func NewRouteFromURL(url string, alias string) (Route, error) {
 		return Route{}, err
 	}
 
-	key, err := NewID(alias, request)
+	key, err := NewCacheKey(alias, request)
 	if err != nil {
 		return Route{}, err
 	}

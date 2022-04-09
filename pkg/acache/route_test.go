@@ -46,7 +46,7 @@ func Test_id_ToKey(t *testing.T) {
 				t.Fail()
 			}
 
-			id, err := NewID(tt.fields.Alias, req)
+			id, err := NewCacheKey(tt.fields.Alias, req)
 			if err != nil {
 				t.Fail()
 			}
@@ -70,7 +70,7 @@ func Test_encodeBase64String(t *testing.T) {
 		t.Fail()
 	}
 
-	id, err := NewID("alias", req)
+	id, err := NewCacheKey("alias", req)
 	if err != nil {
 		t.Fail()
 	}

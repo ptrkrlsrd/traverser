@@ -6,25 +6,25 @@ import (
 	"net/http"
 )
 
-type id struct {
+type cacheKey struct {
 	Alias   string          `json:"alias"`
 	Request StorableRequest `json:"request"`
 }
 
-func NewID(alias string, request *http.Request) (id, error) {
+func NewCacheKey(alias string, request *http.Request) (cacheKey, error) {
 	storableRequest, err := NewStorableRequest(request)
 	if err != nil {
-		return id{}, err
+		return cacheKey{}, err
 	}
 
-	return id{
+	return cacheKey{
 		Alias:   alias,
 		Request: storableRequest,
 	}, nil
 }
 
-func (id id) ToKey() (string, error) {
-	jsonString, err := json.Marshal(id)
+func (key cacheKey) ToKey() (string, error) {
+	jsonString, err := json.Marshal(key)
 	if err != nil {
 		return "", err
 	}
