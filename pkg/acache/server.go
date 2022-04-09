@@ -101,6 +101,10 @@ func (server *Server) PrintRouteInfo() {
 	routes.PrintInfo()
 }
 
+func (server *Server) ClearDatabase() error {
+	return server.store.Clear()
+}
+
 //Start starts the API server
 func (server *Server) Start() error {
 	return server.router.Run(fmt.Sprintf(":%d", server.port))

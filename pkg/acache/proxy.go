@@ -44,11 +44,22 @@ func (server *Server) proxyHandleFunc(proxyURL string, newRouteChan chan (ProxyR
 func listenAndHandleProxyRoutes(proxyRouteChan chan (ProxyRoute), store RouteStorer) {
 	for {
 		proxyRoute := <-proxyRouteChan
+
+		existingRoutes, err := store.GetRoutes()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if existingRoutes.ContainsAlias(proxyRoute.Alias) {
+			continue
+		}
+
 		route, err := NewRouteFromURL(proxyRoute.OriginalURL, proxyRoute.Alias)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		log.Printf("Adding route: %s, %s", route.Alias, route.URL)
 		store.AddRoute(route)
 	}
 }

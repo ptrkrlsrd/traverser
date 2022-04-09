@@ -28,6 +28,10 @@ func (ms *MockStorage) AddRoute(route Route) error {
 	return nil
 }
 
+func (ms *MockStorage) Clear() error {
+	return nil
+}
+
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode) // Release mode to make gin less verbose
 	router := gin.New()          // TODO: Figure out if its okay to use New here instead of Default

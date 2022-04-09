@@ -85,3 +85,7 @@ func (storage *badgerStorage) AddRoute(route Route) error {
 		return err
 	})
 }
+
+func (storage *badgerStorage) Clear() error {
+	return storage.db.DropAll()
+}
