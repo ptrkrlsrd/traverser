@@ -1,8 +1,6 @@
 package acache
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,7 +9,7 @@ import (
 
 // Route contains a route that will be served by the Server
 type Route struct {
-	ID       string           `json:"key"`
+	ID       id               `json:"key"`
 	URL      string           `json:"url"`
 	Alias    string           `json:"alias"`
 	Method   string           `json:"method"`
@@ -19,8 +17,17 @@ type Route struct {
 }
 
 func NewRouteFromResponse(url, alias, method string, res *http.Response) (Route, error) {
-	key := createKey(alias)
 	response, err := NewStorableResponse(res)
+	if err != nil {
+		return Route{}, err
+	}
+
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return Route{}, err
+	}
+
+	key, err := NewID(alias, req)
 	if err != nil {
 		return Route{}, err
 	}
@@ -35,13 +42,23 @@ func NewRouteFromResponse(url, alias, method string, res *http.Response) (Route,
 }
 
 func NewRouteFromURL(url string, alias string) (Route, error) {
-	res, err := http.Get(url)
+	client := &http.Client{}
+	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return Route{}, err
 	}
 
-	key := createKey(alias)
+	res, err := client.Do(request)
+	if err != nil {
+		return Route{}, err
+	}
+
 	response, err := NewStorableResponse(res)
+	if err != nil {
+		return Route{}, err
+	}
+
+	key, err := NewID(alias, request)
 	if err != nil {
 		return Route{}, err
 	}
@@ -53,13 +70,6 @@ func NewRouteFromURL(url string, alias string) (Route, error) {
 		Method:   http.MethodGet,
 		Response: response,
 	}, nil
-}
-
-func createKey(alias string) string {
-	sha1er := sha1.New()
-	sha1er.Write([]byte(alias))
-	key := hex.EncodeToString(sha1er.Sum(nil))
-	return key
 }
 
 // NewRouteFromBytes RouteFromBytes creates a new route from a slice of bytes.
@@ -77,15 +87,27 @@ func NewRouteFromBytes(bytes []byte) (Route, error) {
 // Routes is a type that represents a slice of Routes
 type Routes []Route
 
-//ContainsURL ContainsURL returns true if the slice of routes contains an URL
-func (routes *Routes) ContainsURL(url string) bool {
-	for _, v := range *routes {
-		if v.URL == url {
+func contains[T Route](routes []T, fn func(item T) bool) bool {
+	for _, value := range routes {
+		if fn(value) {
 			return true
 		}
 	}
-
 	return false
+}
+
+//ContainsURL ContainsURL returns true if the slice of routes contains an URL
+func (routes *Routes) ContainsURL(url string) bool {
+	return contains(*routes, func(item Route) bool {
+		return item.URL == url
+	})
+}
+
+//ContainsAlias ContainsAlias returns true if the slice of routes contains an alias
+func (routes *Routes) ContainsAlias(alias string) bool {
+	return contains(*routes, func(item Route) bool {
+		return item.Alias == alias
+	})
 }
 
 // ToString converts a slice of routes to a string with a newline to make printing easier
@@ -106,7 +128,7 @@ func (routes Routes) Print() {
 //PrintInfo prints info about all the routes
 func (routes Routes) PrintInfo() {
 	for i, v := range routes {
-		fmt.Printf("%d) %s\n\tAlias: %s\n\tKey: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.ID, v.Method)
+		fmt.Printf("%d) %s\n\tAlias: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.Method)
 		for k, h := range v.Response.Header {
 			fmt.Printf("\t\t%s: %s\n", k, strings.Join(h, " "))
 		}

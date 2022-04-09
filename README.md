@@ -15,14 +15,15 @@ Usage:
 
 Available Commands:
   add         Add a new route. 
-                Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
-                Here the first argument is the path to the endpoint you want to cache, 
-                and the last is the alias
-  completion  generate the autocompletion script for the specified shell
+		Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
+		Here the first argument is the path to the endpoint you want to cache, 
+		and the last is the alias
+  clear       Clears the database containing the stored routes.
+  completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   info        Print route information
   list        List all routes(aliases)
-  proxy       Start the server as a proxy between you and another API
+  proxy       Start Acache as a proxy between you and another API and save the responses locally
   serve       Load the stored routes from cache and serve the API
 
 Flags:
