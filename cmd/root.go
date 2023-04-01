@@ -45,7 +45,7 @@ func init() {
 
 	// Initialize the database and config
 	cobra.OnInitialize(initConfig)
-	cobra.OnInitialize(initDB)
+	cobra.OnInitialize(initFileStore)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -87,6 +87,18 @@ func initDB() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	server = acache.NewServer(storage, router)
+}
+
+func initFileStore() {
+	dbPath := "./routes.yaml"
+	yamlStorage, err := acache.NewYAMLStorage(dbPath)
+	if err != nil {
+		HandleError(err)
+	}
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	server = acache.NewServer(yamlStorage, router)
 }
 
 func checkOrCreateFolder(expandedConfigPath string) error {

@@ -8,6 +8,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	gopkg.in/mattes/go-expand-tilde.v1 v1.0.0-20150330173918-cb884138e64c
+	gopkg.in/yaml.v2 v2.2.2
 )
 
 require (

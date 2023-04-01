@@ -1,7 +1,8 @@
 package acache
 
 type RouteStorer interface {
-	GetRoutes() (routes Routes, err error)
+	GetRoute(RouteFilter) (Route, error)
+	GetRoutes() (Routes, error)
 	AddRoute(Route) error
 	Clear() error
 }

@@ -8,7 +8,7 @@ import (
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
-// badgerStorage is a wrapper around badger.DB that implements the Store interface
+// badgerStorage is a wrapper around badger.DB that implements the Storer interface
 type badgerStorage struct {
 	db *badger.DB
 }
@@ -30,7 +30,41 @@ func NewBadgerStorage(db *badger.DB) (RouteStorer, error) {
 	return &badgerStorage{db: db}, nil
 }
 
-//GetRoutes loads the routes from the storage and returns them
+type RouteFilter struct {
+	Alias string
+	URL   string
+}
+
+// GetRoute gets a route from the storage
+func (storage *badgerStorage) GetRoute(filter RouteFilter) (Route, error) {
+	var route Route
+	err := storage.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		routeData, err := bytesFromIterator(it)
+		for _, v := range routeData {
+			routeFromBytes, err := NewRouteFromBytes(v)
+			if err != nil {
+				return fmt.Errorf("failed reading route from bytes: %v", err)
+			}
+			if (routeFromBytes.Alias == filter.Alias) || (routeFromBytes.URL == filter.URL) {
+				route = routeFromBytes
+			}
+		}
+		return err
+	})
+
+	if err != nil {
+		return Route{}, err
+	}
+
+	return route, nil
+}
+
+// GetRoutes loads the routes from the storage and returns them
 func (storage *badgerStorage) GetRoutes() (routes Routes, err error) {
 	err = storage.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -57,22 +91,6 @@ func (storage *badgerStorage) GetRoutes() (routes Routes, err error) {
 	return routes, nil
 }
 
-// bytesFromIterator iterates over the iterator and returns a slice of bytes
-func bytesFromIterator(it *badger.Iterator) ([][]byte, error) {
-	data := [][]byte{}
-	for it.Rewind(); it.Valid(); it.Next() {
-		item := it.Item()
-		err := item.Value(func(v []byte) error {
-			data = append(data, v)
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-	return data, nil
-}
-
 // AddRoute adds a route the database
 func (storage *badgerStorage) AddRoute(route Route) error {
 	jsonData, err := json.Marshal(route)
@@ -88,4 +106,20 @@ func (storage *badgerStorage) AddRoute(route Route) error {
 
 func (storage *badgerStorage) Clear() error {
 	return storage.db.DropAll()
+}
+
+// bytesFromIterator iterates over the iterator and returns a slice of bytes
+func bytesFromIterator(it *badger.Iterator) ([][]byte, error) {
+	data := [][]byte{}
+	for it.Rewind(); it.Valid(); it.Next() {
+		item := it.Item()
+		err := item.Value(func(v []byte) error {
+			data = append(data, v)
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return data, nil
 }
