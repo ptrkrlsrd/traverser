@@ -2,7 +2,7 @@ package acache
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -39,7 +39,7 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	testResponse := &http.Response{
 		Status:     "200 OK",
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(strings.NewReader("Hello world!")),
+		Body:       io.NopCloser(strings.NewReader("Hello world!")),
 		Header:     http.Header{},
 	}
 

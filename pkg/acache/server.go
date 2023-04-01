@@ -3,7 +3,6 @@ package acache
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,8 +36,8 @@ func (server *Server) UsePort(port int) {
 // routeHandler handles the route
 func routeHandler(route Route) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		for header, v := range route.Response.Header {
-			c.Header(header, strings.Join(v, ","))
+		for header, v := range route.Response.Headers {
+			c.Header(header, v)
 		}
 
 		c.String(route.Response.StatusCode, string(route.Response.Body))
@@ -105,7 +104,7 @@ func (server *Server) ClearDatabase() error {
 	return server.store.Clear()
 }
 
-//Start starts the API server
+// Start starts the API server
 func (server *Server) Start() error {
 	return server.router.Run(fmt.Sprintf(":%d", server.port))
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // Route contains a route that will be served by the Server
@@ -96,14 +95,14 @@ func contains[T Route](routes []T, fn func(item T) bool) bool {
 	return false
 }
 
-//ContainsURL ContainsURL returns true if the slice of routes contains an URL
+// ContainsURL ContainsURL returns true if the slice of routes contains an URL
 func (routes *Routes) ContainsURL(url string) bool {
 	return contains(*routes, func(item Route) bool {
 		return item.URL == url
 	})
 }
 
-//ContainsAlias ContainsAlias returns true if the slice of routes contains an alias
+// ContainsAlias ContainsAlias returns true if the slice of routes contains an alias
 func (routes *Routes) ContainsAlias(alias string) bool {
 	return contains(*routes, func(item Route) bool {
 		return item.Alias == alias
@@ -125,12 +124,12 @@ func (routes Routes) Print() {
 	fmt.Print(routes.ToString())
 }
 
-//PrintInfo prints info about all the routes
+// PrintInfo prints info about all the routes
 func (routes Routes) PrintInfo() {
 	for i, v := range routes {
 		fmt.Printf("%d) %s\n\tAlias: %s\n\tMethod: %s\n\tHeaders:\n", i, v.URL, v.Alias, v.Method)
-		for k, h := range v.Response.Header {
-			fmt.Printf("\t\t%s: %s\n", k, strings.Join(h, " "))
+		for k, h := range v.Response.Headers {
+			fmt.Printf("\t\t%s: %s\n", k, h)
 		}
 	}
 }
