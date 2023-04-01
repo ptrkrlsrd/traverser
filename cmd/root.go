@@ -104,6 +104,7 @@ func initServer() {
 
 func initFileStore() {
 	var err error
+	checkOrCreateFile(yamlFilePath)
 	storage, err = acache.NewYAMLStorage(yamlFilePath)
 	if err != nil {
 		HandleError(err)
@@ -113,6 +114,14 @@ func initFileStore() {
 func checkOrCreateFolder(expandedConfigPath string) error {
 	if _, err := os.Stat(expandedConfigPath); os.IsNotExist(err) {
 		return os.Mkdir(expandedConfigPath, os.ModePerm)
+	}
+	return nil
+}
+
+func checkOrCreateFile(filePath string) error {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		_, err := os.Create(filePath)
+		return err
 	}
 	return nil
 }
