@@ -2,7 +2,7 @@ package acache
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -14,7 +14,7 @@ func TestStorableResponse(t *testing.T) {
 	testResponse := &http.Response{
 		Status:     status,
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(strings.NewReader(testBody)),
+		Body:       io.NopCloser(strings.NewReader(testBody)),
 		Header:     http.Header{},
 	}
 
@@ -42,7 +42,7 @@ func TestIfCanWriteStorableResponse(t *testing.T) {
 	testResponse := &http.Response{
 		Status:     status,
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(strings.NewReader("Hello world!")),
+		Body:       io.NopCloser(strings.NewReader("Hello world!")),
 		Header:     http.Header{},
 	}
 
