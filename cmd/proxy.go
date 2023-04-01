@@ -14,7 +14,7 @@ var proxyCmd = &cobra.Command{
 	Short: "Start Acache as a proxy between you and another API and save the responses locally",
 	Long: `Start Acache as a proxy between you and another API and save the responses locally. 
 	Example: acache proxy https://pokeapi.co/api/v2/pokemon.`,
-	Args: cobra.ExactValidArgs(1),
+	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
 		proxyURL := args[0]
 		re := regexp.MustCompile(`^(http|https)://.+`)
