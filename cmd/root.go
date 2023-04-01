@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 
@@ -13,8 +14,11 @@ import (
 )
 
 var (
-	cfgFile string
-	server  acache.Server
+	cfgFile      string
+	databasePath string
+	yamlFilePath string
+	server       acache.Server
+	storage      acache.RouteStorer
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -39,13 +43,21 @@ func Execute() {
 }
 
 func init() {
-	// Set the flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
-	rootCmd.PersistentFlags().StringP("database", "d", "~/.config/acache/", "Database")
+	var useYamlStorage bool
 
-	// Initialize the database and config
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
+	rootCmd.PersistentFlags().StringVar(&databasePath, "d", "~/.config/acache/", "Database")
+	rootCmd.PersistentFlags().BoolVar(&useYamlStorage, "y", false, "Use YAML storage")
+	rootCmd.PersistentFlags().StringVar(&yamlFilePath, "yaml-path", "./routes.yaml", "Use YAML storage")
+
 	cobra.OnInitialize(initConfig)
-	cobra.OnInitialize(initFileStore)
+	if useYamlStorage {
+		cobra.OnInitialize(initFileStore)
+	} else {
+		cobra.OnInitialize(initBadgerDB)
+	}
+
+	cobra.OnInitialize(initServer)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -55,7 +67,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Search config in home directory with name ".config/acache" (without extension).
-		configPath, err := tilde.Expand(rootCmd.Flag("config").Value.String())
+		configPath, err := tilde.Expand(cfgFile)
 		HandleError(err)
 
 		viper.AddConfigPath(configPath)
@@ -70,9 +82,9 @@ func initConfig() {
 	}
 }
 
-func initDB() {
-	pathVariable := rootCmd.Flag("database").Value.String()
-	expandedConfigPath, err := tilde.Expand(pathVariable)
+func initBadgerDB() {
+	expandedConfigPath, err := tilde.Expand(databasePath)
+	log.Println(databasePath)
 	HandleError(err)
 
 	checkOrCreateFolder(expandedConfigPath)
@@ -81,24 +93,22 @@ func initDB() {
 	db, err := acache.NewBadgerDB(path.Join(expandedConfigPath, "acache.db"))
 	HandleError(err)
 
-	storage, err := acache.NewBadgerStorage(db)
+	storage, err = acache.NewBadgerStorage(db)
 	HandleError(err)
+}
 
+func initServer() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	server = acache.NewServer(storage, router)
 }
 
 func initFileStore() {
-	dbPath := "./routes.yaml"
-	yamlStorage, err := acache.NewYAMLStorage(dbPath)
+	var err error
+	storage, err = acache.NewYAMLStorage(yamlFilePath)
 	if err != nil {
 		HandleError(err)
 	}
-
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	server = acache.NewServer(yamlStorage, router)
 }
 
 func checkOrCreateFolder(expandedConfigPath string) error {
