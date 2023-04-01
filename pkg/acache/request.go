@@ -37,7 +37,7 @@ func NewStorableRequestWithResponse(req *http.Request, resp http.Response) (Stor
 		Response: StorableResponse{
 			StatusCode: resp.StatusCode,
 			Headers:    headers,
-			Body:       body,
+			Body:       string(body),
 		},
 	}
 

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 
@@ -14,11 +13,12 @@ import (
 )
 
 var (
-	cfgFile      string
-	databasePath string
-	yamlFilePath string
-	server       acache.Server
-	storage      acache.RouteStorer
+	cfgFile        string
+	databasePath   string
+	yamlFilePath   string
+	useYamlStorage bool
+	server         acache.Server
+	storage        acache.RouteStorer
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -43,20 +43,12 @@ func Execute() {
 }
 
 func init() {
-	var useYamlStorage bool
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
 	rootCmd.PersistentFlags().StringVar(&databasePath, "d", "~/.config/acache/", "Database")
-	rootCmd.PersistentFlags().BoolVar(&useYamlStorage, "y", false, "Use YAML storage")
+	rootCmd.PersistentFlags().BoolVarP(&useYamlStorage, "use-yaml", "y", false, "Use YAML storage")
 	rootCmd.PersistentFlags().StringVar(&yamlFilePath, "yaml-path", "./routes.yaml", "Use YAML storage")
-
 	cobra.OnInitialize(initConfig)
-	if useYamlStorage {
-		cobra.OnInitialize(initFileStore)
-	} else {
-		cobra.OnInitialize(initBadgerDB)
-	}
-
+	cobra.OnInitialize(initStorage)
 	cobra.OnInitialize(initServer)
 }
 
@@ -82,9 +74,16 @@ func initConfig() {
 	}
 }
 
+func initStorage() {
+	if useYamlStorage {
+		initFileStore()
+	} else {
+		initBadgerDB()
+	}
+}
+
 func initBadgerDB() {
 	expandedConfigPath, err := tilde.Expand(databasePath)
-	log.Println(databasePath)
 	HandleError(err)
 
 	checkOrCreateFolder(expandedConfigPath)

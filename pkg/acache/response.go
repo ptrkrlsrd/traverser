@@ -9,7 +9,7 @@ type StorableResponse struct {
 	Status           string
 	StatusCode       int
 	Headers          map[string]string
-	Body             []byte
+	Body             string
 	ContentLength    int64
 	TransferEncoding []string
 }
@@ -28,7 +28,7 @@ func NewStorableResponse(httpResponse *http.Response) (StorableResponse, error) 
 		Status:           httpResponse.Status,
 		StatusCode:       httpResponse.StatusCode,
 		Headers:          headers,
-		Body:             body,
+		Body:             string(body),
 		ContentLength:    httpResponse.ContentLength,
 		TransferEncoding: httpResponse.TransferEncoding,
 	}, nil
