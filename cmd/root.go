@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	databaseName   string = "acache.db"
 	cfgFile        string
 	databasePath   string
 	yamlFilePath   string
@@ -89,7 +90,7 @@ func initBadgerDB() {
 	checkOrCreateFolder(expandedConfigPath)
 	HandleError(err)
 
-	db, err := acache.NewBadgerDB(path.Join(expandedConfigPath, "acache.db"))
+	db, err := acache.NewBadgerDB(path.Join(expandedConfigPath, databaseName))
 	HandleError(err)
 
 	storage, err = acache.NewBadgerStorage(db)

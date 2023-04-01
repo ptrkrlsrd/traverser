@@ -13,6 +13,7 @@ type Route struct {
 	Alias    string           `json:"alias"`
 	Method   string           `json:"method"`
 	Response StorableResponse `json:"response"`
+	Request  StorableRequest  `json:"request"`
 }
 
 func NewRouteFromResponse(url, alias, method string, res *http.Response) (Route, error) {
@@ -62,12 +63,18 @@ func NewRouteFromURL(url string, alias string) (Route, error) {
 		return Route{}, err
 	}
 
+	storableRequest, err := NewStorableRequest(request)
+	if err != nil {
+		return Route{}, err
+	}
+
 	return Route{
 		ID:       key,
 		URL:      url,
 		Alias:    alias,
 		Method:   http.MethodGet,
 		Response: response,
+		Request:  storableRequest,
 	}, nil
 }
 
