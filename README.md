@@ -14,22 +14,24 @@ Usage:
   acache [command]
 
 Available Commands:
-  add         Add a new route. 
-		Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
-		Here the first argument is the path to the endpoint you want to cache, 
-		and the last is the alias
-  clear       Clears the database containing the stored routes.
+  add         Add a new route.
+                Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
+                Here the first argument is the path to the endpoint you want to cache,
+                and the last is the alias
+  clear       Clears the database containing the stored routes
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   info        Print route information
-  list        List all routes(aliases)
+  list        List all routes
   proxy       Start Acache as a proxy between you and another API and save the responses locally
   serve       Load the stored routes from cache and serve the API
 
 Flags:
-      --config string     Config file (default "~/.config/acache/acache.json")
-  -d, --database string   Database (default "~/.config/acache/")
-  -h, --help              help for acache
+      --config string      Config file (default "~/.config/acache/acache.json")
+      --d string           Database (default "~/.config/acache/")
+  -h, --help               help for acache
+  -y, --use-yaml           Use YAML storage
+      --yaml-path string   Use YAML storage (default "./routes/")
 
 Use "acache [command] --help" for more information about a command.
 ```
