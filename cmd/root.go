@@ -47,7 +47,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
 	rootCmd.PersistentFlags().StringVar(&databasePath, "d", "~/.config/acache/", "Database")
 	rootCmd.PersistentFlags().BoolVarP(&useYamlStorage, "use-yaml", "y", false, "Use YAML storage")
-	rootCmd.PersistentFlags().StringVar(&yamlFilePath, "yaml-path", "./routes/", "Use YAML storage")
+	rootCmd.PersistentFlags().StringVar(&yamlFilePath, "yaml-path", "./routes/", "Yaml storage path")
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(initStorage)
 	cobra.OnInitialize(initServer)

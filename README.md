@@ -31,7 +31,7 @@ Flags:
       --d string           Database (default "~/.config/acache/")
   -h, --help               help for acache
   -y, --use-yaml           Use YAML storage
-      --yaml-path string   Use YAML storage (default "./routes/")
+      --yaml-path string   Yaml storage path (default "./routes/")
 
 Use "acache [command] --help" for more information about a command.
 ```
