@@ -6,12 +6,12 @@ import (
 )
 
 type StorableResponse struct {
-	Status           string
-	StatusCode       int
-	Headers          map[string]string
-	Body             string
-	ContentLength    int64
-	TransferEncoding []string
+	Status           string            `json:"status,omitempty"`
+	StatusCode       int               `json:"status_code,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty"`
+	Body             string            `json:"body,omitempty"`
+	ContentLength    int64             `json:"content_length,omitempty"`
+	TransferEncoding []string          `json:"transfer_encoding,omitempty"`
 }
 
 // NewStorableResponse maps a http.Response to a StorableResponse

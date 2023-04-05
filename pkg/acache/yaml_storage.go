@@ -2,10 +2,14 @@ package acache
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
+
+const FileExtension string = ".yaml"
 
 type yamlStorage struct {
 	path string
@@ -33,17 +37,36 @@ func (storage *yamlStorage) GetRoute(filter RouteFilter) (Route, error) {
 func (storage *yamlStorage) GetRoutes() (Routes, error) {
 	routes := Routes{}
 
-	data, err := ioutil.ReadFile(storage.path)
+	filePaths, err := storage.findFiles()
 	if err != nil {
-		return routes, err
+		return Routes{}, err
 	}
 
-	err = yaml.Unmarshal(data, &routes)
-	if err != nil {
-		return routes, err
+	for _, i := range filePaths {
+		data, err := os.ReadFile(i)
+		if err != nil {
+			return routes, err
+		}
+        var route Route
+
+		err = yaml.Unmarshal(data, &route)
+		if err != nil {
+			return routes, err
+		}
+
+        routes = append(routes, route)
 	}
 
 	return routes, nil
+}
+
+func (storage *yamlStorage) findFiles() ([]string, error) {
+    filesGlob := path.Join(storage.path, "*" + FileExtension)
+	filePaths, err := filepath.Glob(filesGlob)
+	if err != nil {
+		return nil, err
+	}
+	return filePaths, nil
 }
 
 func (storage *yamlStorage) AddRoute(route Route) error {
@@ -58,16 +81,29 @@ func (storage *yamlStorage) AddRoute(route Route) error {
 		}
 	}
 
-	routes = append(routes, route)
-
-	data, err := yaml.Marshal(&routes)
+	data, err := yaml.Marshal(&route)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(storage.path, data, 0644)
+	key, err := route.ID.ToKey()
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(path.Join(storage.path, key) + FileExtension, data, 0644)
 }
 
 func (storage *yamlStorage) Clear() error {
-	return ioutil.WriteFile(storage.path, []byte{}, 0644)
+    filePaths, err := storage.findFiles()
+    if err != nil {
+        return err
+    }
+    for _, i := range filePaths {
+        err := os.Remove(i)
+        if err != nil {
+            return err
+        }
+    }
+    return nil
 }

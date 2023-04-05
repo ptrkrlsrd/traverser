@@ -23,17 +23,32 @@ func NewCacheKey(alias string, request *http.Request) (cacheKey, error) {
 	}, nil
 }
 
-func (key cacheKey) ToKey() (string, error) {
-	jsonString, err := json.Marshal(key)
-	if err != nil {
-		return "", err
-	}
-
-	encoded := encodeBase64String(string(jsonString))
+func (self cacheKey) ToKey() (string, error) {
+	encoded := encodeBase64String([]byte(self.Alias + self.Request.URL))
 
 	return encoded, nil
 }
 
-func encodeBase64String(str string) string {
-	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(str))
+func CacheKeyFromKey(key string) (cacheKey, error) {
+	decodedString, err := decodeBase64String(key)
+	if err != nil {
+		return cacheKey{}, err
+	}
+
+    var c cacheKey
+
+	err = json.Unmarshal(decodedString, &c)
+	if err != nil {
+		return cacheKey{}, err
+	}
+
+	return c, nil
+}
+
+func encodeBase64String(str []byte) string {
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(str)
+}
+
+func decodeBase64String(str string) ([]byte, error) {
+	return base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(str)
 }

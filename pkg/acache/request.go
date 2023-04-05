@@ -6,25 +6,19 @@ import (
 )
 
 type StorableRequest struct {
-	Method     string            `yaml:"method"`
-	URL        string            `yaml:"url"`
-	Proto      string            `yaml:"proto"`
-	Headers    map[string]string `yaml:"headers"`
-	Body       []byte            `yaml:"body"`
-	Host       string            `yaml:"host"`
-	RemoteAddr string            `yaml:"remoteAddr"`
-	Response   StorableResponse  `yaml:"response"`
+	Method     string            `json:"method,omitempty"`
+	URL        string            `json:"url,omitempty"`
+	Proto      string            `json:"proto,omitempty"`
+	Headers    map[string]string `json:"headers,omitempty"`
+	Body       []byte            `json:"body,omitempty"`
+	Host       string            `json:"host,omitempty"`
+	RemoteAddr string            `json:"remote_addr,omitempty"`
 }
 
 func NewStorableRequestWithResponse(req *http.Request, resp http.Response) (StorableRequest, error) {
 	headers := make(map[string]string)
 	for k, v := range req.Header {
 		headers[k] = v[0]
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return StorableRequest{}, err
 	}
 
 	storableRequest := StorableRequest{
@@ -34,11 +28,6 @@ func NewStorableRequestWithResponse(req *http.Request, resp http.Response) (Stor
 		Headers:    headers,
 		Host:       req.Host,
 		RemoteAddr: req.RemoteAddr,
-		Response: StorableResponse{
-			StatusCode: resp.StatusCode,
-			Headers:    headers,
-			Body:       string(body),
-		},
 	}
 
 	if req.Body != nil {

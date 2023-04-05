@@ -19,6 +19,10 @@ type MockStorage struct {
 	routes Routes
 }
 
+func (*MockStorage) GetRoute(RouteFilter) (Route, error) {
+	return Route{}, nil
+}
+
 func (ms *MockStorage) GetRoutes() (routes Routes, err error) {
 	return routes, nil
 }

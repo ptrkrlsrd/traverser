@@ -2,17 +2,20 @@ package acache
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"testing"
 )
 
-const wantEncoded = "eyJhbGlhcyI6ImFsaWFzIiwicmVxdWVzdCI6eyJNZXRob2QiOiJHRVQiLCJVUkwiOnsiU2NoZW1lIjoiaHR0cHMiLCJPcGFxdWUiOiIiLCJVc2VyIjpudWxsLCJIb3N0IjoiZXhhbXBsZS5jb20iLCJQYXRoIjoiIiwiUmF3UGF0aCI6IiIsIkZvcmNlUXVlcnkiOmZhbHNlLCJSYXdRdWVyeSI6IiIsIkZyYWdtZW50IjoiIiwiUmF3RnJhZ21lbnQiOiIifSwiUHJvdG8iOiJIVFRQLzEuMSIsIlByb3RvTWFqb3IiOjEsIlByb3RvTWlub3IiOjEsIkhlYWRlciI6e30sIkJvZHkiOm51bGwsIkNvbnRlbnRMZW5ndGgiOjAsIlRyYW5zZmVyRW5jb2RpbmciOm51bGwsIkNsb3NlIjpmYWxzZSwiSG9zdCI6ImV4YW1wbGUuY29tIiwiRm9ybSI6bnVsbCwiUG9zdEZvcm0iOm51bGwsIk11bHRpcGFydEZvcm0iOm51bGwsIlRyYWlsZXIiOm51bGx9fQ"
+const wantEncoded = "YWxpYXNodHRwOi8vZXhhbXBsZS5jb20vdGVzdA"
 
-func Test_id_ToKey(t *testing.T) {
+func Test_Id_ToKey(t *testing.T) {
 	type fields struct {
 		Alias string
-		Body  []byte
+		Request http.Request
 	}
 	tests := []struct {
 		name    string
@@ -22,31 +25,63 @@ func Test_id_ToKey(t *testing.T) {
 	}{
 		{
 			name: "Creates base64 encoded string",
-			fields: fields{
-				Alias: "alias",
-				Body:  []byte("body"),
-			},
-			want:    wantEncoded,
-			wantErr: false,
-		},
-		{
-			name: "Creates base64 encoded string",
-			fields: fields{
-				Alias: "alias",
-				Body:  []byte("body"),
-			},
+            fields: fields{
+                Alias: "alias",
+                Request: http.Request{
+                    Method: http.MethodGet,
+                    URL: &url.URL{
+                        Scheme: "http",
+                        Host:   "example.com",
+                        Path:   "/test",
+                    },
+                    GetBody: func() (io.ReadCloser, error) {
+                        return io.NopCloser(strings.NewReader("Hello, World!")), nil
+                    },
+                    ContentLength:    13,
+                    TransferEncoding: []string{"identity"},
+                    Close:            false,
+                    Host:             "example.com",
+                    Form: map[string][]string{
+                        "key1": {"value1"},
+                        "key2": {"value2"},
+                    },
+                    PostForm: map[string][]string{
+                        "postKey1": {"postValue1"},
+                        "postKey2": {"postValue2"},
+                    },
+                    MultipartForm: nil,
+                    Trailer: map[string][]string{
+                        "Trailer-Key": {"Trailer-Value"},
+                    },
+                    RemoteAddr: "192.0.2.1:12345",
+                    RequestURI: "/test?param=value",
+                    TLS:        nil,
+                    Cancel:     nil,
+                    Response: &http.Response{
+                        Status:           "200 OK",
+                        StatusCode:       200,
+                        Proto:            "HTTP/1.1",
+                        ProtoMajor:       1,
+                        ProtoMinor:       1,
+                        Header:           http.Header{"Content-Type": {"application/json"}},
+                        Body:             ioutil.NopCloser(strings.NewReader(`{"status": "success"}`)),
+                        ContentLength:    21,
+                        TransferEncoding: []string{"identity"},
+                        Close:            false,
+                        Uncompressed:     false,
+                        Trailer:          http.Header{"Content-Encoding": {"gzip"}},
+                        Request:          nil,
+                        TLS:              nil,
+                    },
+                },
+            },
 			want:    wantEncoded,
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest("GET", "https://example.com", nil)
-			if err != nil {
-				t.Fail()
-			}
-
-			id, err := NewCacheKey(tt.fields.Alias, req)
+			id, err := NewCacheKey(tt.fields.Alias, &tt.fields.Request)
 			if err != nil {
 				t.Fail()
 			}
@@ -59,7 +94,6 @@ func Test_id_ToKey(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("id.ToKey() = %v, want %v", got, tt.want)
 			}
-			fmt.Println(got)
 		})
 	}
 }
@@ -79,13 +113,13 @@ func Test_encodeBase64String(t *testing.T) {
 
 	tests := []struct {
 		name string
-		args string
+		args []byte
 		want string
 	}{
 		{
 			name: "Encodes base64 string",
-			args: string(testData),
-			want: wantEncoded,
+			args: testData,
+			want: "eyJhbGlhcyI6ImFsaWFzIiwicmVxdWVzdCI6eyJtZXRob2QiOiJHRVQiLCJ1cmwiOiJodHRwczovL2V4YW1wbGUuY29tIiwicHJvdG8iOiJIVFRQLzEuMSIsImhvc3QiOiJleGFtcGxlLmNvbSJ9fQ",
 		},
 	}
 	for _, tt := range tests {
