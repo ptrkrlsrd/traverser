@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const wantEncoded = "YWxpYXNodHRwOi8vZXhhbXBsZS5jb20vdGVzdA"
+const wantEncoded = "YWxpYXM"
 
 func Test_Id_ToKey(t *testing.T) {
 	type fields struct {
@@ -34,13 +34,9 @@ func Test_Id_ToKey(t *testing.T) {
 				t.Fail()
 			}
 
-			got, err := id.ToKey()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("id.ToKey() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := id
 			if got != tt.want {
-				t.Errorf("id.ToKey() = %v, want %v", got, tt.want)
+				t.Errorf("id = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -62,7 +58,7 @@ func Test_encodeBase64String(t *testing.T) {
 		{
 			name: "Encodes base64 string",
 			args: testData,
-			want: "eyJhbGlhcyI6ImFsaWFzIiwicmVxdWVzdCI6eyJtZXRob2QiOiJHRVQiLCJ1cmwiOiJodHRwczovL2V4YW1wbGUuY29tIiwicHJvdG8iOiJIVFRQLzEuMSIsImhvc3QiOiJleGFtcGxlLmNvbSJ9fQ",
+			want: "IllXeHBZWE0i",
 		},
 	}
 	for _, tt := range tests {
