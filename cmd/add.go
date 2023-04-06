@@ -20,7 +20,8 @@ var addCmd = &cobra.Command{
 	Short: `Add a new route. 
 		Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
 		Here the first argument is the path to the endpoint you want to cache, 
-		and the last is the alias`,
+		and the last is the alias. Note that you can also add from a json file by replacing 
+        the first URL with a relative path to a json file.`,
 
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
