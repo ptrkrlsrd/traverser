@@ -54,6 +54,13 @@ acache proxy https://api.coinmarketcap.com/
 ```
 This will create a proxy between you and the API which you can call by for example running `curl localhost:3000/v1/eth` which internally fetches `https://api.coinmarketcap.com/v1/ticker/eth` and stores the response into BadgerDB.
 
+#### Approach 3. Add from JSON files
+You can also add a route from a JSON file containing the body of the response you want to add. The Content-Type header will be set to "application/json".
+```
+acache add ./route.json /route
+```
+
+
 
 ### Serving the stored API endpoints
 * Start the server by running:
