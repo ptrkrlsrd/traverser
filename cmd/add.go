@@ -29,14 +29,12 @@ var addCmd = &cobra.Command{
 		alias := args[1]
 
         if isURL(path) {
-            fmt.Println("url")
             route, err := acache.NewRouteFromURL(path, alias)
             HandleError(err)
 
             err = server.AddRoute(route)
             HandleError(err)
         } else if isFile(path) {
-            fmt.Println("file")
             route, err := acache.NewRouteFromFile(path, alias)
             HandleError(err)
 
