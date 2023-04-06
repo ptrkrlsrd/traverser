@@ -18,7 +18,7 @@ Available Commands:
                 Example: "acache add https://pokeapi.co/api/v2/pokemon/ditto /ditto"
                 Here the first argument is the path to the endpoint you want to cache,
                 and the last is the alias. Note that you can also add from a json file by replacing
-        the first URL with a relative path to a json file.
+                the first URL with a relative path to a json file.
   clear       Clears the database containing the stored routes
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
@@ -52,7 +52,7 @@ acache add https://api.coinmarketcap.com/v1/ticker/eth /v1/eth
 ```
 acache proxy https://api.coinmarketcap.com/
 ```
-This will create a proxy between you and the API which you can call by for example running `curl localhost:3000/v1/eth` which internally fetches `https://api.coinmarketcap.com/v1/ticker/eth` and stores the response into BadgerDB.
+This will create a proxy between you and the API which you can call by for example running `curl localhost:3000/v1/eth` which internally fetches `https://api.coinmarketcap.com/v1/ticker/eth` and stores the response.
 
 #### Approach 3. Add from JSON files
 You can also add a route from a JSON file containing the body of the response you want to add. The Content-Type header will be set to "application/json".
