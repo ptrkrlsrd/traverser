@@ -2,47 +2,21 @@ package acache
 
 import (
 	"encoding/base64"
-	"encoding/json"
-	"net/http"
 )
 
-type cacheKey struct {
-	Alias   string          `json:"alias"`
-	Request StorableRequest `json:"request"`
-}
-
-func NewCacheKey(alias string, request *http.Request) (cacheKey, error) {
-	storableRequest, err := NewStorableRequest(request)
-	if err != nil {
-		return cacheKey{}, err
-	}
-
-	return cacheKey{
-		Alias:   alias,
-		Request: storableRequest,
-	}, nil
-}
-
-func (self cacheKey) ToKey() (string, error) {
-	encoded := encodeBase64String([]byte(self.Alias + self.Request.URL))
+func NewCacheKey(alias string) (string, error) {
+	encoded := encodeBase64String([]byte(alias))
 
 	return encoded, nil
 }
 
-func CacheKeyFromKey(key string) (cacheKey, error) {
+func CacheKeyFromKey(key string) (string, error) {
 	decodedString, err := decodeBase64String(key)
 	if err != nil {
-		return cacheKey{}, err
+		return "", err
 	}
 
-    var c cacheKey
-
-	err = json.Unmarshal(decodedString, &c)
-	if err != nil {
-		return cacheKey{}, err
-	}
-
-	return c, nil
+	return string(decodedString), nil
 }
 
 func encodeBase64String(str []byte) string {

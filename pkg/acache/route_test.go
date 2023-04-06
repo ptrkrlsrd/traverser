@@ -15,8 +15,8 @@ const wantEncoded = "YWxpYXNodHRwOi8vZXhhbXBsZS5jb20vdGVzdA"
 func Test_Id_ToKey(t *testing.T) {
 	type fields struct {
 		Alias string
-		Request http.Request
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -27,53 +27,6 @@ func Test_Id_ToKey(t *testing.T) {
 			name: "Creates base64 encoded string",
             fields: fields{
                 Alias: "alias",
-                Request: http.Request{
-                    Method: http.MethodGet,
-                    URL: &url.URL{
-                        Scheme: "http",
-                        Host:   "example.com",
-                        Path:   "/test",
-                    },
-                    GetBody: func() (io.ReadCloser, error) {
-                        return io.NopCloser(strings.NewReader("Hello, World!")), nil
-                    },
-                    ContentLength:    13,
-                    TransferEncoding: []string{"identity"},
-                    Close:            false,
-                    Host:             "example.com",
-                    Form: map[string][]string{
-                        "key1": {"value1"},
-                        "key2": {"value2"},
-                    },
-                    PostForm: map[string][]string{
-                        "postKey1": {"postValue1"},
-                        "postKey2": {"postValue2"},
-                    },
-                    MultipartForm: nil,
-                    Trailer: map[string][]string{
-                        "Trailer-Key": {"Trailer-Value"},
-                    },
-                    RemoteAddr: "192.0.2.1:12345",
-                    RequestURI: "/test?param=value",
-                    TLS:        nil,
-                    Cancel:     nil,
-                    Response: &http.Response{
-                        Status:           "200 OK",
-                        StatusCode:       200,
-                        Proto:            "HTTP/1.1",
-                        ProtoMajor:       1,
-                        ProtoMinor:       1,
-                        Header:           http.Header{"Content-Type": {"application/json"}},
-                        Body:             ioutil.NopCloser(strings.NewReader(`{"status": "success"}`)),
-                        ContentLength:    21,
-                        TransferEncoding: []string{"identity"},
-                        Close:            false,
-                        Uncompressed:     false,
-                        Trailer:          http.Header{"Content-Encoding": {"gzip"}},
-                        Request:          nil,
-                        TLS:              nil,
-                    },
-                },
             },
 			want:    wantEncoded,
 			wantErr: false,
@@ -81,7 +34,7 @@ func Test_Id_ToKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, err := NewCacheKey(tt.fields.Alias, &tt.fields.Request)
+			id, err := NewCacheKey(tt.fields.Alias)
 			if err != nil {
 				t.Fail()
 			}
@@ -99,12 +52,7 @@ func Test_Id_ToKey(t *testing.T) {
 }
 
 func Test_encodeBase64String(t *testing.T) {
-	req, err := http.NewRequest("GET", "https://example.com", nil)
-	if err != nil {
-		t.Fail()
-	}
-
-	id, err := NewCacheKey("alias", req)
+	id, err := NewCacheKey("alias")
 	if err != nil {
 		t.Fail()
 	}

@@ -86,12 +86,7 @@ func (storage *yamlStorage) AddRoute(route Route) error {
 		return err
 	}
 
-	key, err := route.ID.ToKey()
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(path.Join(storage.path, key) + FileExtension, data, 0644)
+	return os.WriteFile(path.Join(storage.path, route.ID) + FileExtension, data, 0644)
 }
 
 func (storage *yamlStorage) Clear() error {
