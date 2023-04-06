@@ -3,6 +3,7 @@ package acache
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -80,6 +81,35 @@ func NewRouteFromURL(url string, alias string) (Route, error) {
 		Response: response,
 		Request:  storableRequest,
 	}, nil
+}
+
+func NewRouteFromFile(filePath string, alias string) (Route, error) {
+	var response StorableResponse
+
+	fileData, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return Route{}, fmt.Errorf("failed to read file: %v", err)
+	}
+
+	jsonData := string(fileData)
+	response.Body = jsonData
+	response.ContentLength = int64(len(jsonData))
+	response.Headers = map[string]string{"Content-Type": "application/json"}
+
+	key, err := NewCacheKey(alias)
+	if err != nil {
+		return Route{}, fmt.Errorf("failed to create cache key: %v", err)
+	}
+
+	route := Route{
+		ID:       key,
+		URL:      filePath,
+		Method:   http.MethodGet,
+		Alias:    alias,
+		Response: response,
+	}
+
+	return route, nil
 }
 
 // NewRouteFromBytes RouteFromBytes creates a new route from a slice of bytes.

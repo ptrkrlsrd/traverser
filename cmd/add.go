@@ -1,16 +1,16 @@
 package cmd
 
 import (
+	"fmt"
+	"net/url"
+	"os"
+	"regexp"
+
 	"github.com/ptrkrlsrd/acache/pkg/acache"
 	"github.com/spf13/cobra"
 )
 
-var (
-	postData string
-)
-
 func init() {
-	addCmd.PersistentFlags().StringVarP(&postData, "data", "i", "", "")
 	rootCmd.AddCommand(addCmd)
 }
 
@@ -24,13 +24,39 @@ var addCmd = &cobra.Command{
 
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		url := args[0]
+		path := args[0]
 		alias := args[1]
 
-		route, err := acache.NewRouteFromURL(url, alias)
-		HandleError(err)
+        if isURL(path) {
+            fmt.Println("url")
+            route, err := acache.NewRouteFromURL(path, alias)
+            HandleError(err)
 
-		err = server.AddRoute(route)
-		HandleError(err)
+            err = server.AddRoute(route)
+            HandleError(err)
+        } else if isFile(path) {
+            fmt.Println("file")
+            route, err := acache.NewRouteFromFile(path, alias)
+            HandleError(err)
+
+            err = server.AddRoute(route)
+            HandleError(err)
+        }
 	},
+}
+
+
+func isURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+func isFile(str string) bool {
+	match, _ := regexp.MatchString(`^(?:(?:[a-zA-Z]:)?[/\\]{0,2})?(?:\.{1,2}[/\\])?[\w\s-]+(?:[/\\][\w\s-]+)*(?:\.[\w-]+)?$`, str)
+	if !match {
+		return false
+	}
+
+	_, err := os.Stat(str)
+	return !os.IsNotExist(err)
 }
