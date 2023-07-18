@@ -77,4 +77,3 @@ $ curl localhost:3000/v1/eth
 - [Go](https://golang.org/) <3
 - [Cobra](https://github.com/spf13/cobra)
 - [Badger DB](https://github.com/dgraph-io/badger)
-- I would also thank Github CoPilot for awesome suggestions while creating this tool
