@@ -1,4 +1,4 @@
-module github.com/ptrkrlsrd/acache
+module github.com/ptrkrlsrd/traverser
 
 go 1.18
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ptrkrlsrd/acache/cmd"
+	"github.com/ptrkrlsrd/traverser/cmd"
 )
 
 func main() {

@@ -11,9 +11,9 @@ import (
 // proxyCmd proxies the stored routes
 var proxyCmd = &cobra.Command{
 	Use:   "proxy",
-	Short: "Start Acache as a proxy between you and another API and save the responses locally",
-	Long: `Start Acache as a proxy between you and another API and save the responses locally. 
-	Example: acache proxy https://pokeapi.co/api/v2/pokemon.`,
+	Short: "Start Traverser as a proxy between you and another API and save the responses locally",
+	Long: `Start Traverser as a proxy between you and another API and save the responses locally. 
+	Example: traverser proxy https://pokeapi.co/api/v2/pokemon.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1)),
 	Run: func(cmd *cobra.Command, args []string) {
 		proxyURL := args[0]

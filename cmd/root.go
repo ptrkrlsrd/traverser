@@ -6,25 +6,25 @@ import (
 	"path"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ptrkrlsrd/acache/pkg/acache"
+	"github.com/ptrkrlsrd/traverser/pkg/traverser"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
 var (
-	databaseName   string = "acache.db"
+	databaseName   string = "traverser.db"
 	cfgFile        string
 	databasePath   string
 	yamlFilePath   string
 	useYamlStorage bool
-	server         acache.Server
-	storage        acache.RouteStorer
+	server         traverser.Server
+	storage        traverser.RouteStorer
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "acache",
+	Use:   "traverser",
 	Short: "API response recorder",
 }
 
@@ -44,8 +44,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/acache/acache.json", "Config file")
-	rootCmd.PersistentFlags().StringVar(&databasePath, "d", "~/.config/acache/", "Database")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.config/traverser/traverser.json", "Config file")
+	rootCmd.PersistentFlags().StringVar(&databasePath, "d", "~/.config/traverser/", "Database")
 	rootCmd.PersistentFlags().BoolVarP(&useYamlStorage, "use-yaml", "y", false, "Use YAML storage")
 	rootCmd.PersistentFlags().StringVar(&yamlFilePath, "yaml-path", "./routes/", "Yaml storage path")
 	cobra.OnInitialize(initConfig)
@@ -59,7 +59,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Search config in home directory with name ".config/acache" (without extension).
+		// Search config in home directory with name ".config/traverser" (without extension).
 		configPath, err := tilde.Expand(cfgFile)
 		HandleError(err)
 
@@ -90,23 +90,23 @@ func initBadgerDB() {
 	checkOrCreateFolder(expandedConfigPath)
 	HandleError(err)
 
-	db, err := acache.NewBadgerDB(path.Join(expandedConfigPath, databaseName))
+	db, err := traverser.NewBadgerDB(path.Join(expandedConfigPath, databaseName))
 	HandleError(err)
 
-	storage, err = acache.NewBadgerStorage(db)
+	storage, err = traverser.NewBadgerStorage(db)
 	HandleError(err)
 }
 
 func initServer() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	server = acache.NewServer(storage, router)
+	server = traverser.NewServer(storage, router)
 }
 
 func initFileStore() {
 	var err error
 	checkOrCreateFolder(yamlFilePath)
-	storage, err = acache.NewYAMLStorage(yamlFilePath)
+	storage, err = traverser.NewYAMLStorage(yamlFilePath)
 	if err != nil {
 		HandleError(err)
 	}
